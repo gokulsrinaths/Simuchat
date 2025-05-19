@@ -29,12 +29,13 @@ class Logger:
         output_dir = env.OUTPUT_DIR
         output_dir.mkdir(exist_ok=True)
     
-    def log_message(self, message: Dict[str, Any], trust_snapshot: Optional[Dict] = None):
+    def log_message(self, message: Dict[str, Any], trust_snapshot: Optional[Dict] = None, rewards_info: Optional[Dict] = None):
         """Log a message to the log files.
         
         Args:
             message: The message to log
             trust_snapshot: Optional snapshot of current trust scores
+            rewards_info: Optional information about rewards earned
         """
         # Create log entry
         timestamp = datetime.datetime.now().isoformat()
@@ -44,6 +45,10 @@ class Logger:
             "message": message.copy(),
             "trust_snapshot": trust_snapshot
         }
+        
+        # Add rewards info if provided
+        if rewards_info:
+            log_entry["rewards_info"] = rewards_info
         
         # Add to memory
         self.log_entries.append(log_entry)
@@ -169,6 +174,42 @@ class Logger:
                     height: 100%;
                     background-color: #4CAF50;
                 }}
+                .rewards {{
+                    background-color: #fff8e1;
+                    padding: 8px 12px;
+                    margin: 5px 0;
+                    border-radius: 4px;
+                    border-left: 3px solid #ffc107;
+                }}
+                .reward-badge {{
+                    display: inline-block;
+                    background-color: #ffc107;
+                    color: #333;
+                    padding: 2px 6px;
+                    border-radius: 20px;
+                    font-size: 0.8em;
+                    margin-right: 5px;
+                }}
+                .rewards-summary {{
+                    background-color: #e8f5e9;
+                    margin: 20px 0;
+                    padding: 15px;
+                    border-radius: 5px;
+                    border-left: 3px solid #4CAF50;
+                }}
+                .rewards-summary h3 {{
+                    margin-top: 0;
+                    color: #2E7D32;
+                }}
+                .agent-rewards {{
+                    display: flex;
+                    align-items: center;
+                    margin: 5px 0;
+                }}
+                .agent-rewards .points {{
+                    font-weight: bold;
+                    margin-left: 10px;
+                }}
             </style>
         </head>
         <body>
@@ -230,6 +271,17 @@ class Logger:
                         </div>
                     </div>
                     """)
+                    
+                    # Add reward information if available
+                    if "rewards_info" in entry and entry["rewards_info"]["rewards_earned"] > 0:
+                        rewards_info = entry["rewards_info"]
+                        rewards_html = f"""
+                        <div class="rewards">
+                            <span class="reward-badge">🏆 +{rewards_info["rewards_earned"]}</span>
+                            {', '.join(rewards_info["reasons"])}
+                        </div>
+                        """
+                        messages_html.append(rewards_html)
                 
                 # Add trust data if available
                 if "trust_snapshot" in entry and entry["trust_snapshot"]:
@@ -256,12 +308,54 @@ class Logger:
         # Combine all message HTML
         all_messages_html = "".join(messages_html)
         
+        # Add rewards summary at the end
+        rewards_summary = self._generate_rewards_summary()
+        if rewards_summary:
+            all_messages_html += rewards_summary
+        
         # Replace placeholder in template
         html_content = html_template.format(messages=all_messages_html)
         
         # Write to HTML file
         with open(self.html_path, "w", encoding="utf-8") as f:
             f.write(html_content)
+    
+    def _generate_rewards_summary(self) -> str:
+        """Generate HTML for the rewards summary section.
+        
+        Returns:
+            HTML string for the rewards summary
+        """
+        # Collect all agents and their rewards from log entries
+        agent_rewards = {}
+        
+        for entry in self.log_entries:
+            if "rewards_info" in entry and entry["rewards_info"]["agent"] not in agent_rewards:
+                agent_rewards[entry["rewards_info"]["agent"]] = 0
+            
+            if "rewards_info" in entry:
+                agent_name = entry["rewards_info"]["agent"]
+                points = entry["rewards_info"]["rewards_earned"]
+                agent_rewards[agent_name] = agent_rewards.get(agent_name, 0) + points
+        
+        if not agent_rewards:
+            return ""
+        
+        # Generate the HTML
+        html = ["<div class='rewards-summary'><h3>🏆 Rewards Summary</h3>"]
+        
+        # Sort agents by points (highest first)
+        sorted_agents = sorted(agent_rewards.items(), key=lambda x: x[1], reverse=True)
+        
+        for agent_name, points in sorted_agents:
+            html.append(f"""
+            <div class="agent-rewards">
+                <strong>{agent_name}:</strong> <span class="points">{points} points</span>
+            </div>
+            """)
+        
+        html.append("</div>")
+        return "".join(html)
     
     def start_new_session(self):
         """Start a new logging session with a new session ID."""

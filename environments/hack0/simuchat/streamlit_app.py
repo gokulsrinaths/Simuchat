@@ -13,6 +13,7 @@ import env
 from llama_api import get_agent_response
 from memory import MemoryManager
 from trust import TrustEngine
+from rewards import RewardSystem
 from utils import (
     get_random_emotion,
     detect_insight,
@@ -29,10 +30,12 @@ def init_session_state():
         st.session_state.message_history = []
         st.session_state.memory_manager = MemoryManager()
         st.session_state.trust_engine = TrustEngine()
+        st.session_state.reward_system = RewardSystem()
         st.session_state.logger = Logger()
         st.session_state.turn = 0
         st.session_state.agent_index = 0
         st.session_state.is_generating = False
+        st.session_state.auto_conversation = False
         st.session_state.agent_names = env.get_all_agent_names()
 
 
@@ -50,6 +53,14 @@ def get_agent_response_for_ui(agent_name):
     # Get the agent's memory context
     memory_context = st.session_state.memory_manager.get_memory_context(agent_name)
     
+    # Get reward context
+    reward_context = st.session_state.reward_system.get_reward_context(agent_name)
+    
+    # Combine contexts
+    full_context = memory_context
+    if reward_context:
+        full_context += "\n\n" + reward_context
+    
     # Get temperature for this agent
     temperature = agent_config.get("temperature", 0.6)
     temperature_multiplier = env.get_api_setting("temperature_multiplier", 1.0)
@@ -61,7 +72,7 @@ def get_agent_response_for_ui(agent_name):
             agent_name=agent_name,
             agent_system_prompt=agent_config["system_prompt"],
             message_history=st.session_state.message_history,
-            memory_context=memory_context,
+            memory_context=full_context,
             temperature=adjusted_temperature
         )
     
@@ -96,8 +107,16 @@ def get_agent_response_for_ui(agent_name):
     # Update trust between agents
     trust_changes = st.session_state.trust_engine.update_all_trust(st.session_state.message_history)
     
-    # Log the message and trust changes
-    st.session_state.logger.log_message(message, trust_changes)
+    # Process rewards for this message
+    rewards_info = st.session_state.reward_system.process_message_rewards(
+        agent_name, 
+        has_insight,
+        trust_changes
+    )
+    message["metadata"]["rewards"] = rewards_info
+    
+    # Log the message, trust changes, and rewards
+    st.session_state.logger.log_message(message, trust_changes, rewards_info)
     
     # If it was an insight, also log it as an insight
     if has_insight:
@@ -155,28 +174,38 @@ def display_message_ui(message):
             
             # Display the message content
             st.markdown(message["content"])
+            
+            # Display reward information if available
+            if "rewards" in metadata and metadata["rewards"]["rewards_earned"] > 0:
+                reward_info = metadata["rewards"]
+                st.markdown(f"🏆 **+{reward_info['rewards_earned']} points**: {', '.join(reward_info['reasons'])}")
 
 
-def display_trust_ui():
-    """Display trust network in the Streamlit UI."""
-    st.subheader("Trust Network")
+def display_rewards_ui():
+    """Display rewards information in the Streamlit UI."""
+    st.subheader("🏆 Agent Rewards")
     
-    trust_matrix = st.session_state.trust_engine.get_trust_matrix()
-    agent_names = st.session_state.agent_names
+    # Get current rewards
+    rewards = st.session_state.reward_system.get_all_rewards()
     
-    # Create a table for the trust network
-    for agent1 in agent_names:
-        cols = st.columns(len(agent_names))
+    # Sort by rewards (highest first)
+    sorted_agents = sorted(rewards.items(), key=lambda x: x[1], reverse=True)
+    
+    # Display in columns
+    cols = st.columns(len(sorted_agents))
+    
+    for i, (agent_name, points) in enumerate(sorted_agents):
+        agent_config = env.get_agent_config(agent_name)
+        emoji = agent_config.get("emoji", "🤖")
         
-        for i, agent2 in enumerate(agent_names):
-            if agent1 != agent2:
-                trust_value = st.session_state.trust_engine.get_trust(agent1, agent2)
-                cols[i].metric(
-                    label=f"{agent1} → {agent2}",
-                    value=f"{trust_value:.2f}"
-                )
-                # Show a progress bar for the trust level
-                cols[i].progress(trust_value)
+        cols[i].metric(
+            label=f"{emoji} {agent_name}",
+            value=f"{points} pts"
+        )
+        
+        # Add a small trophy for the leader
+        if i == 0 and points > 0:
+            cols[i].markdown("👑 Leader")
 
 
 def main():
@@ -188,11 +217,12 @@ def main():
     )
     
     st.title("SimuChat - AI Group Chat")
-    st.markdown("A WhatsApp-style AI Group Chat with Memory & Trust")
+    st.markdown("A WhatsApp-style AI Group Chat with Memory, Trust & Rewards")
     
     # Initialize session state
     init_session_state()
     
+    # Create a 3-column layout: left sidebar, center chat, right trust network
     # Sidebar with info and controls
     with st.sidebar:
         st.header("About SimuChat")
@@ -200,6 +230,7 @@ def main():
         SimuChat simulates a group chat between AI agents with different personalities.
         Each agent has memory of past interactions and develops trust relationships.
         
+        Agents earn points for increasing trust and having insights!
         Watch for the 💡 icon when agents have insights!
         """)
         
@@ -210,14 +241,31 @@ def main():
             st.markdown(f"- **{emoji} {agent_name}**: {agent_config.get('mood', 'neutral')}")
         
         st.header("Controls")
-        if st.button("Reset Chat"):
+        col1, col2 = st.columns(2)
+        
+        if col1.button("Reset Chat"):
             st.session_state.message_history = []
             st.session_state.memory_manager = MemoryManager()
             st.session_state.trust_engine = TrustEngine()
+            st.session_state.reward_system = RewardSystem()
             st.session_state.logger = Logger()
             st.session_state.turn = 0
             st.session_state.agent_index = 0
+            st.session_state.auto_conversation = False
             st.rerun()
+        
+        # Auto conversation toggle
+        auto_mode = col2.toggle("Auto Mode", value=st.session_state.auto_conversation)
+        if auto_mode != st.session_state.auto_conversation:
+            st.session_state.auto_conversation = auto_mode
+            if auto_mode:
+                st.info("Auto conversation mode enabled. Agents will chat continuously.")
+            else:
+                st.info("Auto conversation mode disabled.")
+        
+        # Number of automatic rounds
+        if st.session_state.auto_conversation:
+            max_auto_rounds = st.slider("Max Rounds", min_value=1, max_value=50, value=10)
         
         if st.session_state.message_history:
             st.download_button(
@@ -227,21 +275,48 @@ def main():
                 mime="text/html"
             )
     
-    # Main chat interface
-    chat_container = st.container()
+    # Main content area with chat and trust network
+    chat_col, trust_col = st.columns([3, 1])  # 3:1 ratio to make chat wider
     
-    with chat_container:
-        # Display all messages in the history
-        for message in st.session_state.message_history:
-            display_message_ui(message)
+    # Main chat interface in the center column
+    with chat_col:
+        st.subheader("Chat")
+        chat_container = st.container()
+        
+        with chat_container:
+            # Display all messages in the history
+            for message in st.session_state.message_history:
+                display_message_ui(message)
+        
+        # User input at the bottom of the chat column
+        user_input = st.chat_input("Type your message here")
     
-    # Display trust network
-    if st.session_state.message_history:
-        display_trust_ui()
+    # Trust and rewards in the right column
+    with trust_col:
+        # Display rewards at the top of the right column
+        if st.session_state.message_history:
+            display_rewards_ui()
+            
+            st.markdown("---")  # Separator
+            
+            st.subheader("Trust Network")
+            trust_matrix = st.session_state.trust_engine.get_trust_matrix()
+            agent_names = st.session_state.agent_names
+            
+            # Display trust network vertically (one agent per row)
+            for agent1 in agent_names:
+                st.write(f"**{agent1}'s Trust:**")
+                
+                for agent2 in agent_names:
+                    if agent1 != agent2:
+                        trust_value = st.session_state.trust_engine.get_trust(agent1, agent2)
+                        
+                        # Show a progress bar for the trust level
+                        st.progress(trust_value, text=f"{agent2}: {trust_value:.2f}")
+                
+                st.markdown("---")  # Add separator between agents
     
-    # User input
-    user_input = st.chat_input("Type your message here")
-    
+    # Process user input
     if user_input:
         # Add user message to history
         user_message = {"role": "user", "content": user_input}
@@ -253,21 +328,17 @@ def main():
         # Log the user message
         st.session_state.logger.log_message(user_message)
         
-        # Display the user message
-        display_message_ui(user_message)
-        
         # Set flag to trigger agent responses
         st.session_state.is_generating = True
         st.rerun()
     
-    # Process agent responses
-    if st.session_state.is_generating and st.session_state.message_history:
+    # Process agent responses (normal mode)
+    if st.session_state.is_generating and not st.session_state.auto_conversation and st.session_state.message_history:
         # Get the next agent to respond
         agent_name = st.session_state.agent_names[st.session_state.agent_index]
         
-        # Get and display the agent's response
+        # Get the agent's response
         agent_message = get_agent_response_for_ui(agent_name)
-        display_message_ui(agent_message)
         
         # Continue generating responses from all agents
         if st.session_state.agent_index > 0:
@@ -276,6 +347,27 @@ def main():
         else:
             # All agents have responded, wait for user input
             st.session_state.is_generating = False
+    
+    # Process agent responses (auto conversation mode)
+    elif st.session_state.auto_conversation and st.session_state.message_history:
+        # Check if we need to start generating or continue
+        if not st.session_state.is_generating:
+            st.session_state.is_generating = True
+            # Reset agent index if needed
+            if st.session_state.agent_index == 0:
+                st.info("Starting automatic conversation...")
+        
+        # Get the next agent to respond
+        agent_name = st.session_state.agent_names[st.session_state.agent_index]
+        
+        # Get the agent's response
+        agent_message = get_agent_response_for_ui(agent_name)
+        
+        # Add a pause to slow down the conversation
+        time.sleep(1.5)  # Longer pause for auto mode
+        
+        # Always rerun in auto mode to continue the conversation
+        st.rerun()
 
 
 if __name__ == "__main__":
