@@ -1,6 +1,6 @@
-# SimuChat - AI Group Chat with Memory and Trust
+# SimuChat - AI Group Chat with Memory, Trust, and Rewards
 
-SimuChat is a WhatsApp-style group chat simulator that creates conversations between three AI agents (Alice, Bob, and Charlie), each with distinct personalities. The agents maintain memory of past conversations, develop trust relationships with each other, and can have "insight moments" during the discussion.
+SimuChat is a WhatsApp-style group chat simulator that creates conversations between three AI agents (Alice, Bob, and Charlie), each with distinct personalities. The agents maintain memory of past conversations, develop trust relationships with each other, earn rewards for positive interactions, and can have "insight moments" during the discussion.
 
 ![SimuChat Screenshot](https://via.placeholder.com/800x450?text=SimuChat+Screenshot)
 
@@ -10,7 +10,9 @@ SimuChat is a WhatsApp-style group chat simulator that creates conversations bet
 - **Agent Memory**: Each agent remembers previous messages and builds context
 - **Insight Detection**: Identifies when agents change their mind or have realizations
 - **Trust Engine**: Trust scores evolve between agents based on agreement/disagreement
+- **Reward System**: Agents earn points for increasing trust and having insights
 - **Emotion + Mood Simulation**: Dynamic emotions and moods affect agent responses
+- **Automatic Conversation**: Agents can continue chatting autonomously
 - **Configurable Agent Setup**: Easy to add or modify agents
 - **Logging**: Detailed conversation logs in JSONL and HTML formats
 - **Console and Streamlit UI**: Both terminal and web interfaces available
@@ -65,6 +67,12 @@ Run the console application:
 python main.py
 ```
 
+Features:
+- Enter a topic to start the conversation
+- Type 'auto' to start automatic conversation mode (agents continue chatting)
+- Type 'stop' to end automatic mode
+- Type 'quit' to exit the application
+
 ### Streamlit UI (Optional)
 
 Run the Streamlit web interface:
@@ -73,14 +81,22 @@ Run the Streamlit web interface:
 streamlit run streamlit_app.py
 ```
 
+The Streamlit UI includes:
+- Toggle for automatic conversation mode
+- Real-time trust network visualization
+- Reward badges and leaderboard
+- Download conversation logs as HTML
+
 ## How It Works
 
 1. The user types a starting topic (e.g., "Let's discuss climate change")
 2. Alice, Bob, and Charlie respond in sequence, using their unique personalities
 3. Each agent maintains memory of previous messages
 4. Trust scores between agents evolve based on agreement/disagreement
-5. The system tracks "insight moments" when agents change perspective
-6. A log of the conversation is saved in both JSONL and HTML formats
+5. Agents earn rewards for increasing trust and having insights
+6. The system tracks "insight moments" when agents change perspective
+7. In automatic mode, agents continue chatting with minimal user intervention
+8. A log of the conversation is saved in both JSONL and HTML formats
 
 ## Metrics and Analysis
 
@@ -94,10 +110,23 @@ SimuChat tracks several metrics during the conversation that can be used for ana
 | `emotions` | Distribution of emotions expressed by each agent |
 | `moods` | Distribution of moods experienced by each agent |
 | `trust_scores` | Trust relationships between every agent pair |
+| `agent_rewards` | Points earned by each agent for trust and insights |
 | `avg_trust` | Average trust score for each agent |
 | `duration` | Total running time of the simulation |
 
 These metrics are saved in `metrics.jsonl` and can be loaded directly into WandB for visualization.
+
+## Agent Reward System
+
+Agents earn points in two ways:
+- **+1 point**: When another agent's trust toward them increases
+- **+2 points**: When they have an "insight moment" (changing stance, agreeing unexpectedly)
+
+The reward system affects agents in several ways:
+- Agents are aware of their rewards and rank in the simulation
+- Rewards are displayed in the UI next to messages
+- A leaderboard shows the current points for each agent
+- Rewards are included in the HTML and JSONL logs
 
 ## Adding More Agents
 
@@ -127,6 +156,7 @@ These metrics are saved in `metrics.jsonl` and can be loaded directly into WandB
 ├── llama_api.py          # Meta LLaMA API integration
 ├── memory.py             # Agent memory management
 ├── trust.py              # Trust relationship engine
+├── rewards.py            # Agent reward system
 ├── utils.py              # Utility functions
 ├── logger.py             # Logging utilities
 ├── streamlit_app.py      # Streamlit UI (optional)
@@ -143,6 +173,8 @@ These metrics are saved in `metrics.jsonl` and can be loaded directly into WandB
 - **API**: Uses Meta's LLaMA API (model: `Llama-4-Maverick-17B-128E-Instruct-FP8`)
 - **Memory**: Each agent maintains memory of the last 3 messages from other agents
 - **Trust**: Trust scores range from 0.0 to 1.0, starting at 0.5
+- **Rewards**: Points accumulate based on trust increases and insights
+- **Auto-conversation**: Can run up to 50 rounds autonomously
 - **Insight Detection**: Uses pattern matching and agreement/disagreement analysis
 - **Logging**: Detailed logs are saved for later analysis
 
