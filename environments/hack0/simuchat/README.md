@@ -37,6 +37,26 @@ API_KEY = "YOUR_META_API_KEY"  # Format: "LLM|1050039463644017|ZZzxjun1klZ76kW0x
 
 ## Running SimuChat
 
+### Atropos / Headless Mode
+
+SimuChat can be run programmatically or as part of an automated system:
+
+```python
+from environments.hack0.simuchat.env import run
+
+# Run simulation for 5 turns with prompt
+metrics = run(
+    prompt="Discuss the impact of AI on society", 
+    num_turns=5, 
+    headless=True
+)
+```
+
+This will generate:
+- `output/chatlog.jsonl` - Full conversation log
+- `output/chatlog.html` - HTML formatted log
+- `output/metrics.jsonl` - Metrics for WandB compatibility
+
 ### Terminal Interface
 
 Run the console application:
@@ -62,6 +82,23 @@ streamlit run streamlit_app.py
 5. The system tracks "insight moments" when agents change perspective
 6. A log of the conversation is saved in both JSONL and HTML formats
 
+## Metrics and Analysis
+
+SimuChat tracks several metrics during the conversation that can be used for analysis:
+
+| Metric | Description |
+|--------|-------------|
+| `num_messages` | Total number of messages exchanged |
+| `agent_messages` | Number of messages from each agent |
+| `insights` | Count of insight moments per agent |
+| `emotions` | Distribution of emotions expressed by each agent |
+| `moods` | Distribution of moods experienced by each agent |
+| `trust_scores` | Trust relationships between every agent pair |
+| `avg_trust` | Average trust score for each agent |
+| `duration` | Total running time of the simulation |
+
+These metrics are saved in `metrics.jsonl` and can be loaded directly into WandB for visualization.
+
 ## Adding More Agents
 
 1. Open `agents_config.json`
@@ -84,7 +121,7 @@ streamlit run streamlit_app.py
 
 ```
 /simuchat/
-├── env.py                # Environment settings
+├── env.py                # Environment settings and run() function
 ├── agents_config.json    # Agent personalities and config
 ├── main.py               # Console application entry point
 ├── llama_api.py          # Meta LLaMA API integration
@@ -96,6 +133,7 @@ streamlit run streamlit_app.py
 ├── output/               # Generated logs
 │   ├── chatlog.jsonl     # JSON Lines log
 │   ├── chatlog.html      # HTML formatted log
+│   ├── metrics.jsonl     # Metrics for WandB
 ├── README.md             # This file
 └── requirements.txt      # Dependencies
 ```
