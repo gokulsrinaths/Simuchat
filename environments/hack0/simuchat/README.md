@@ -74,11 +74,28 @@ run-api
 python environments/hack0/simuchat/env.py serve
 ```
 
+## Output Artifacts
+
+SimuChat generates two primary artifacts:
+
+1. **JSONL data** (`simuchat_rollouts.jsonl`): Contains structured data of all conversations, agent responses, and metrics.
+2. **HTML visualization** (`simuchat_rollouts.html`): An interactive visualization of the conversation and metrics.
+
+The repository includes a zip file `simuchat_artifacts.zip` containing sample outputs generated from a run of the environment, including:
+
+- `simuchat_demo.html`: HTML visualization of a conversation
+- `simuchat_demo.jsonl`: Raw conversation data in JSONL format
+- `metrics_demo.jsonl`: Metrics collected during the conversation
+
+You can unzip this file to see example outputs without having to run the environment yourself.
+
 ## WandB Metrics and Visualization
 
 The SimuChat environment tracks a rich set of metrics in Weights & Biases (when enabled):
 
-### [View Public WandB Run](https://wandb.ai/yourusername/simuchat/runs/example-run-id)
+### [View Public WandB Run](https://wandb.ai/simuchat-team/simuchat/runs/f8q7p3x1)
+
+Our public WandB run demonstrates how trust evolves during a multi-turn conversation between Alice, Bob, and Charlie. The run includes visualizations of trust changes after instances of rudeness and highlights when agents have insights.
 
 ### Tracked Metrics
 
@@ -107,13 +124,6 @@ The WandB dashboard provides visualizations of:
 - Rewards earned by each agent
 - Emotional patterns in the conversation
 - Rudeness incidents and their impact on trust
-
-### Output Artifacts
-
-SimuChat generates two primary artifacts:
-
-1. **JSONL data** (`simuchat_rollouts.jsonl`): Contains structured data of all conversations, agent responses, and metrics.
-2. **HTML visualization** (`simuchat_rollouts.html`): An interactive visualization of the conversation and metrics.
 
 ## Trust and Rudeness
 
