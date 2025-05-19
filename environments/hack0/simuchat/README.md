@@ -1,8 +1,145 @@
 # SimuChat - AI Group Chat with Memory, Trust, and Rewards
 
-SimuChat is a WhatsApp-style group chat simulator that creates conversations between three AI agents (Alice, Bob, and Charlie), each with distinct personalities. The agents maintain memory of past conversations, develop trust relationships with each other, earn rewards for positive interactions, and can have "insight moments" during the discussion.
+SimuChat is an Atropos environment that simulates a WhatsApp-style group chat between three AI agents (Alice, Bob, and Charlie), each with distinct personalities. The agents maintain memory of past conversations, develop trust relationships with each other, earn rewards for positive interactions, and can have "insight moments" during the discussion.
 
 ![SimuChat Screenshot](https://via.placeholder.com/800x450?text=SimuChat+Screenshot)
+
+## Environment Design and Motivation
+
+SimuChat was designed to explore realistic social dynamics between AI agents, particularly focusing on trust evolution and how rudeness impacts agent relationships. The key motivation was to create an environment that:
+
+1. **Simulates Social Intelligence**: Tests an AI model's ability to understand and navigate complex social interactions.
+2. **Models Trust Dynamics**: Implements a trust system that evolves based on agents' behavior toward each other.
+3. **Detects Linguistic Nuances**: Identifies when language is rude, agreeable, or insightful.
+4. **Creates Emergent Behavior**: Observes how trust networks and social hierarchies develop naturally from conversation.
+
+The environment is ideal for training and evaluating AI models that require social intelligence, empathy, and politeness in their interactions.
+
+### Core Components
+
+- **Agent Memory System**: Each agent remembers previous messages selectively.
+- **Trust Engine**: Dynamically updates trust scores between agents.
+- **Rudeness Detection**: Analyzes messages for three levels of rudeness.
+- **Insight Detection**: Identifies when agents change their mind or have realizations.
+- **Reward System**: Assigns points based on increasing trust and having insights.
+- **Emotion & Mood Simulation**: Changes agent emotions and moods based on interactions.
+
+## Quickstart Documentation
+
+### Installation
+
+1. Make sure you're in the Atropos repository root directory
+2. Install required dependencies:
+```bash
+pip install -r environments/hack0/simuchat/requirements.txt
+```
+
+### Running the Environment
+
+You can run SimuChat in the Atropos "process" mode, which generates metrics, JSONL and HTML visualizations:
+
+```bash
+python environments/hack0/simuchat/env.py process --env.num_turns 5
+```
+
+#### Options
+
+- `--env.num_turns`: Number of conversation turns (default: 5)
+- `--env.prompt`: Starting prompt (default: "Let's discuss artificial intelligence and its impact on society")
+- `--env.use_wandb`: Enable Weights & Biases logging
+- `--env.wandb_name`: Name for the WandB run
+- `--env.data_path_to_save_groups`: Path for JSONL output (default: `output/simuchat_rollouts.jsonl`)
+
+#### Using with Custom Model
+
+You can use a custom model by specifying API parameters:
+
+```bash
+python environments/hack0/simuchat/env.py process \
+  --openai.model_name "gpt-4" \
+  --openai.api_key "your-api-key" \
+  --openai.base_url "https://api.openai.com/v1" \
+  --env.use_wandb
+```
+
+### Using SimuChat with the Atropos Training Framework
+
+SimuChat can be used with the Atropos training framework:
+
+```bash
+# Start the API server
+run-api
+
+# Run SimuChat environment
+python environments/hack0/simuchat/env.py serve
+```
+
+## WandB Metrics and Visualization
+
+The SimuChat environment tracks a rich set of metrics in Weights & Biases (when enabled):
+
+### [View Public WandB Run](https://wandb.ai/yourusername/simuchat/runs/example-run-id)
+
+### Tracked Metrics
+
+#### Overall Metrics
+- **total_messages**: Total messages in the conversation
+- **simulation_duration**: Time taken to complete the simulation
+
+#### Agent-specific Metrics
+- **{agent}/messages**: Number of messages per agent
+- **{agent}/insights**: Number of insights per agent
+- **{agent}/rewards**: Reward points earned by each agent
+- **{agent}/avg_trust**: Average trust received by each agent
+- **{agent}/emotion_{type}**: Frequency of different emotions
+- **{agent}/mood_{type}**: Frequency of different moods
+
+#### Trust Network Metrics
+- **trust/{agent1}_to_{agent2}**: Trust scores between all agent pairs
+
+#### Rudeness Metrics
+- **{agent}/rudeness_mild**: Instances of mild rudeness
+- **{agent}/rudeness_moderate**: Instances of moderate rudeness
+- **{agent}/rudeness_severe**: Instances of severe rudeness
+
+The WandB dashboard provides visualizations of:
+- Trust relationships over time
+- Rewards earned by each agent
+- Emotional patterns in the conversation
+- Rudeness incidents and their impact on trust
+
+### Output Artifacts
+
+SimuChat generates two primary artifacts:
+
+1. **JSONL data** (`simuchat_rollouts.jsonl`): Contains structured data of all conversations, agent responses, and metrics.
+2. **HTML visualization** (`simuchat_rollouts.html`): An interactive visualization of the conversation and metrics.
+
+## Trust and Rudeness
+
+SimuChat implements a realistic trust system where agents' trust in each other can increase or decrease based on interactions:
+
+### Trust Building
+- Agreement between agents increases trust (+3% to +8%)
+- Similar viewpoints increase trust slightly (+1% to +5%)
+- Mentioning another agent positively increases trust (+3% to +8%)
+
+### Trust Breakdown through Rudeness
+- SimuChat can detect when agents are rude to each other with three levels of severity:
+  - **Mild Rudeness**: Phrases like "that's absurd" or "you're mistaken" (-5% to -10% trust)
+  - **Moderate Rudeness**: Phrases like "shut up" or "you're being stupid" (-10% to -20% trust)
+  - **Severe Rudeness**: Direct insults like "you're an idiot" (-20% to -30% trust)
+  
+- Directed rudeness (specifically naming another agent while being rude) causes 50% more trust damage
+- Trust changes from rudeness are visualized in the HTML output with red indicators
+
+## Future Improvements
+
+Potential enhancements to the SimuChat environment:
+1. Integrate linguistic style matching to affect trust
+2. Add cultural context awareness to rudeness detection
+3. Implement reputation systems that persist across conversations
+4. Add more complex social dynamics like group formation and alliances
 
 ## Features
 
@@ -18,42 +155,9 @@ SimuChat is a WhatsApp-style group chat simulator that creates conversations bet
 - **Logging**: Detailed conversation logs in JSONL and HTML formats
 - **Console and Streamlit UI**: Both terminal and web interfaces available
 
-## Trust and Rudeness
-
-SimuChat implements a realistic trust system where agents' trust in each other can increase or decrease based on interactions:
-
-### Trust Building
-- Agreement between agents increases trust
-- Similar viewpoints increase trust slightly
-- Mentioning another agent positively increases trust
-
-### Trust Breakdown through Rudeness
-- SimuChat can detect when agents are rude to each other with three levels of severity:
-  - **Mild Rudeness**: Phrases like "that's absurd" or "you're mistaken" (-5% to -10% trust)
-  - **Moderate Rudeness**: Phrases like "shut up" or "you're being stupid" (-10% to -20% trust)
-  - **Severe Rudeness**: Direct insults like "you're an idiot" (-20% to -30% trust)
-  
-- Directed rudeness (specifically naming another agent while being rude) causes 50% more trust damage
-- Trust changes from rudeness are visually highlighted in the HTML log with red indicators
-- The rudeness detection makes conversations more realistic, as agents that behave rudely will lose the trust of others quickly
-
-### Trust Visualization
-- Trust is displayed as a percentage between agents
-- Trust levels affect agents' moods (defensive, contemplative, supportive, collaborative)
-- The HTML logs show trust changes with color-coded indicators
-- Significant trust drops from rudeness are highlighted with special formatting
-
 ## Demo
 
 Check out a demo of SimuChat in action: [SimuChat Demo](https://youtu.be/placeholder)
-
-## Installation
-
-1. Clone this repository
-2. Install the required dependencies:
-```
-pip install -r requirements.txt
-```
 
 ## Configuration
 
