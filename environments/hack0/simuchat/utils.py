@@ -192,3 +192,100 @@ def get_insight_message(agent_name: str, message: str) -> str:
     """
     # This could use more sophistication to extract just the insight portion
     return message 
+
+
+def detect_rudeness(agent_name: str, message: str) -> tuple[bool, str]:
+    """Detect if a message contains rude language.
+    
+    Args:
+        agent_name: The agent's name
+        message: The message to check
+        
+    Returns:
+        Tuple of (is_rude, severity) where severity is 'mild', 'moderate', or 'severe'
+    """
+    # Convert message to lowercase for case-insensitive matching
+    content = message.lower()
+    
+    # Define rudeness indicators of varying severity
+    mild_rudeness = [
+        "disagree completely", 
+        "that's not right", 
+        "you're mistaken", 
+        "that's absurd",
+        "ridiculous", 
+        "don't understand", 
+        "clearly wrong", 
+        "nonsense",
+        "illogical", 
+        "makes no sense", 
+        "misleading",
+        "not even close"
+    ]
+    
+    moderate_rudeness = [
+        "shut up", 
+        "you're being stupid", 
+        "that's idiotic", 
+        "you're clueless",
+        "stop talking", 
+        "ignorant", 
+        "you don't know anything",
+        "you're incompetent", 
+        "laughable", 
+        "embarrassing", 
+        "pathetic",
+        "waste of time"
+    ]
+    
+    severe_rudeness = [
+        "you're an idiot", 
+        "stupid", 
+        "fool", 
+        "you're dumb",
+        "useless", 
+        "incompetent", 
+        "you don't deserve", 
+        "worthless",
+        "you should be ashamed", 
+        "you're a joke", 
+        "offensive",
+        "insulting"
+    ]
+    
+    # Check for direct mentions of other agents in rude context
+    # This makes rudeness more impactful when it's directed at a specific agent
+    is_directed = False
+    from env import get_all_agent_names
+    for other_agent in get_all_agent_names():
+        if other_agent != agent_name and other_agent.lower() in content:
+            is_directed = True
+            break
+    
+    # Check for rudeness, starting from most severe
+    for phrase in severe_rudeness:
+        if phrase in content:
+            severity = "severe"
+            # Directed rudeness is even worse
+            if is_directed:
+                severity = "severe"
+            return True, severity
+    
+    for phrase in moderate_rudeness:
+        if phrase in content:
+            severity = "moderate"
+            # Directed rudeness is more severe
+            if is_directed:
+                severity = "severe"
+            return True, severity
+    
+    for phrase in mild_rudeness:
+        if phrase in content:
+            severity = "mild"
+            # Directed rudeness is more severe
+            if is_directed:
+                severity = "moderate"
+            return True, severity
+    
+    # No rudeness detected
+    return False, "none" 

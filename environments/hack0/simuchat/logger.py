@@ -152,6 +152,23 @@ class Logger:
                     left: -10px;
                     top: 5px;
                 }}
+                .mild-rudeness {{
+                    background-color: #fff0e0;
+                    border-left: 3px solid #ffc107;
+                }}
+                .moderate-rudeness {{
+                    background-color: #ffe0e0;
+                    border-left: 3px solid #ff9800;
+                }}
+                .severe-rudeness {{
+                    background-color: #ffe0e0;
+                    border-left: 3px solid #f44336;
+                }}
+                .rudeness-indicator {{
+                    color: #f44336;
+                    font-weight: bold;
+                    margin-right: 5px;
+                }}
                 .metadata {{
                     color: #888;
                     font-size: 0.8em;
@@ -173,6 +190,9 @@ class Logger:
                 .trust-level {{
                     height: 100%;
                     background-color: #4CAF50;
+                }}
+                .trust-decrease {{
+                    background-color: #f44336;
                 }}
                 .rewards {{
                     background-color: #fff8e1;
@@ -209,6 +229,21 @@ class Logger:
                 .agent-rewards .points {{
                     font-weight: bold;
                     margin-left: 10px;
+                }}
+                .trust-change {{
+                    padding: 3px 8px;
+                    border-radius: 4px;
+                    font-size: 0.85em;
+                    margin-top: 5px;
+                    display: inline-block;
+                }}
+                .trust-increase {{
+                    background-color: #e8f5e9;
+                    color: #2E7D32;
+                }}
+                .trust-decrease {{
+                    background-color: #ffebee;
+                    color: #c62828;
                 }}
             </style>
         </head>
@@ -262,9 +297,19 @@ class Logger:
                     is_insight = metadata.get("is_insight", False)
                     insight_class = " insight" if is_insight else ""
                     
+                    # Check for rudeness - we need to detect it here for display
+                    from utils import detect_rudeness
+                    is_rude, rudeness_severity = detect_rudeness(agent_name, msg["content"])
+                    
+                    rudeness_class = ""
+                    rudeness_indicator = ""
+                    if is_rude:
+                        rudeness_class = f" {rudeness_severity}-rudeness"
+                        rudeness_indicator = f'<span class="rudeness-indicator">💢 {rudeness_severity.capitalize()} Rudeness</span>'
+                    
                     messages_html.append(f"""
-                    <div class="message agent-message {agent_class}{insight_class}">
-                        <strong>{agent_name} ({emotion}{mood_text}):</strong>
+                    <div class="message agent-message {agent_class}{insight_class}{rudeness_class}">
+                        <strong>{agent_name} ({emotion}{mood_text}):</strong> {rudeness_indicator}
                         <p>{msg["content"]}</p>
                         <div class="metadata">
                             <span>{entry["timestamp"]}</span>
@@ -293,12 +338,31 @@ class Logger:
                         for target, trust_info in trust_data.items():
                             trust_value = trust_info["new_value"]
                             trust_percent = int(trust_value * 100)
+                            trust_change = trust_info["change"]
+                            reason = trust_info["reason"]
+                            
+                            # Special display for rudeness-related trust changes
+                            rudeness_info = ""
+                            if "rudeness" in reason:
+                                change_class = "trust-decrease" if trust_change < 0 else "trust-increase"
+                                severity = reason.split('_')[-1] if '_' in reason else "unknown"
+                                rudeness_info = f"""
+                                <div class="trust-change {change_class}">
+                                    {round(trust_change * 100)}% trust due to {severity} rudeness
+                                </div>
+                                """
+                            
+                            bar_class = "trust-level"
+                            if trust_change < -0.05:  # Significant decrease
+                                bar_class += " trust-decrease"
+                            
                             trust_html.append(f"""
                             <div>
                                 <strong>{target}:</strong> {trust_value:.2f}
                                 <div class="trust-bar">
-                                    <div class="trust-level" style="width: {trust_percent}%;"></div>
+                                    <div class="{bar_class}" style="width: {trust_percent}%;"></div>
                                 </div>
+                                {rudeness_info}
                             </div>
                             """)
                     

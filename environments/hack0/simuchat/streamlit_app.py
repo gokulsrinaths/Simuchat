@@ -17,7 +17,8 @@ from rewards import RewardSystem
 from utils import (
     get_random_emotion,
     detect_insight,
-    get_insight_message
+    get_insight_message,
+    detect_rudeness
 )
 from logger import Logger
 
@@ -166,6 +167,11 @@ def display_message_ui(message):
                 header += f", {mood_emoji} {mood}"
             header += ")"
             
+            # Check for rudeness
+            is_rude, rudeness_severity = detect_rudeness(agent_name, message["content"])
+            if is_rude:
+                header += f" 💢 **{rudeness_severity.capitalize()} Rudeness**"
+            
             st.markdown(header)
             
             # Add insight indicator if applicable
@@ -232,6 +238,13 @@ def main():
         
         Agents earn points for increasing trust and having insights!
         Watch for the 💡 icon when agents have insights!
+        
+        When agents are rude to each other (💢), their trust decreases:
+        - Mild rudeness: -5% to -10% trust
+        - Moderate rudeness: -10% to -20% trust
+        - Severe rudeness: -20% to -30% trust
+        
+        Direct rudeness (naming another agent) causes 50% more trust damage!
         """)
         
         st.header("Agents")

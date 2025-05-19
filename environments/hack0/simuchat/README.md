@@ -10,12 +10,38 @@ SimuChat is a WhatsApp-style group chat simulator that creates conversations bet
 - **Agent Memory**: Each agent remembers previous messages and builds context
 - **Insight Detection**: Identifies when agents change their mind or have realizations
 - **Trust Engine**: Trust scores evolve between agents based on agreement/disagreement
+- **Rudeness Detection**: Identifies when agents speak rudely to each other, decreasing trust
 - **Reward System**: Agents earn points for increasing trust and having insights
 - **Emotion + Mood Simulation**: Dynamic emotions and moods affect agent responses
 - **Automatic Conversation**: Agents can continue chatting autonomously
 - **Configurable Agent Setup**: Easy to add or modify agents
 - **Logging**: Detailed conversation logs in JSONL and HTML formats
 - **Console and Streamlit UI**: Both terminal and web interfaces available
+
+## Trust and Rudeness
+
+SimuChat implements a realistic trust system where agents' trust in each other can increase or decrease based on interactions:
+
+### Trust Building
+- Agreement between agents increases trust
+- Similar viewpoints increase trust slightly
+- Mentioning another agent positively increases trust
+
+### Trust Breakdown through Rudeness
+- SimuChat can detect when agents are rude to each other with three levels of severity:
+  - **Mild Rudeness**: Phrases like "that's absurd" or "you're mistaken" (-5% to -10% trust)
+  - **Moderate Rudeness**: Phrases like "shut up" or "you're being stupid" (-10% to -20% trust)
+  - **Severe Rudeness**: Direct insults like "you're an idiot" (-20% to -30% trust)
+  
+- Directed rudeness (specifically naming another agent while being rude) causes 50% more trust damage
+- Trust changes from rudeness are visually highlighted in the HTML log with red indicators
+- The rudeness detection makes conversations more realistic, as agents that behave rudely will lose the trust of others quickly
+
+### Trust Visualization
+- Trust is displayed as a percentage between agents
+- Trust levels affect agents' moods (defensive, contemplative, supportive, collaborative)
+- The HTML logs show trust changes with color-coded indicators
+- Significant trust drops from rudeness are highlighted with special formatting
 
 ## Demo
 

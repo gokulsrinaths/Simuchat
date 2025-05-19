@@ -7,6 +7,7 @@ import random
 import numpy as np
 from typing import Dict, List, Tuple, Any
 import env
+from utils import detect_rudeness
 
 
 class TrustEngine:
@@ -80,6 +81,33 @@ class TrustEngine:
         # Calculate text similarity to determine if agents are aligned or in conflict
         content1 = agent1_msg["content"].lower()
         content2 = agent2_msg["content"].lower()
+        
+        # Check for rudeness in agent2's message (the one being trusted)
+        # This can significantly decrease trust from agent1 toward agent2
+        is_rude, rudeness_severity = detect_rudeness(agent2, content2)
+        if is_rude:
+            # Apply different penalties based on severity
+            if rudeness_severity == "mild":
+                trust_change = random.uniform(-0.10, -0.05)
+                reason = "mild_rudeness"
+            elif rudeness_severity == "moderate":
+                trust_change = random.uniform(-0.20, -0.10)
+                reason = "moderate_rudeness"
+            elif rudeness_severity == "severe":
+                trust_change = random.uniform(-0.30, -0.20)
+                reason = "severe_rudeness"
+            
+            # If rudeness is specifically directed at agent1, the trust penalty is more severe
+            if agent1.lower() in content2.lower():
+                trust_change *= 1.5  # 50% more severe penalty for directed rudeness
+                reason = f"directed_{reason}"
+            
+            # Apply the trust change
+            current_trust = self.get_trust(agent1, agent2)
+            new_trust = max(0.0, min(1.0, current_trust + trust_change))
+            self.trust_matrix[agent1][agent2] = new_trust
+            
+            return trust_change, reason
         
         # Very simple heuristic for detecting agreement/disagreement
         # Could be improved with more sophisticated NLP techniques
