@@ -102,11 +102,13 @@ def run(prompt: str, num_turns: int = 3, headless: bool = True) -> Dict[str, Any
     from utils import get_random_emotion, detect_insight, get_insight_message
     from logger import Logger
     from llama_api import get_agent_response
+    from rewards import RewardSystem
     
     # Initialize components
     memory_manager = MemoryManager()
     trust_engine = TrustEngine()
     logger = Logger()
+    reward_system = RewardSystem()
     
     # Start with the user's prompt
     user_message = {"role": "user", "content": prompt}
@@ -150,6 +152,14 @@ def run(prompt: str, num_turns: int = 3, headless: bool = True) -> Dict[str, Any
                 # Get memory context
                 memory_context = memory_manager.get_memory_context(agent_name)
                 
+                # Get reward context
+                reward_context = reward_system.get_reward_context(agent_name)
+                
+                # Combine contexts
+                full_context = memory_context
+                if reward_context:
+                    full_context += "\n\n" + reward_context
+                
                 # Get temperature for this agent
                 temperature = agent_config.get("temperature", 0.6)
                 temperature_multiplier = get_api_setting("temperature_multiplier", 1.0)
@@ -160,7 +170,7 @@ def run(prompt: str, num_turns: int = 3, headless: bool = True) -> Dict[str, Any
                     agent_name=agent_name,
                     agent_system_prompt=agent_config["system_prompt"],
                     message_history=message_history,
-                    memory_context=memory_context,
+                    memory_context=full_context,
                     temperature=adjusted_temperature
                 )
                 
@@ -195,8 +205,16 @@ def run(prompt: str, num_turns: int = 3, headless: bool = True) -> Dict[str, Any
                 # Update trust between agents
                 trust_changes = trust_engine.update_all_trust(message_history)
                 
-                # Log the message and trust changes
-                logger.log_message(message, trust_changes)
+                # Process rewards for this message
+                rewards_info = reward_system.process_message_rewards(
+                    agent_name, 
+                    has_insight,
+                    trust_changes
+                )
+                message["metadata"]["rewards"] = rewards_info
+                
+                # Log the message, trust changes, and rewards
+                logger.log_message(message, trust_changes, rewards_info)
                 
                 # If it was an insight, also log it as an insight
                 if has_insight:
@@ -222,6 +240,12 @@ def run(prompt: str, num_turns: int = 3, headless: bool = True) -> Dict[str, Any
                     metrics["moods"][agent_name][mood] += 1
                 else:
                     metrics["moods"][agent_name][mood] = 1
+                
+                # Add reward metrics
+                if "agent_rewards" not in metrics:
+                    metrics["agent_rewards"] = {}
+                
+                metrics["agent_rewards"][agent_name] = reward_system.get_agent_rewards(agent_name)
             
             # Update trust metrics after each complete round
             for agent1 in agent_names:
@@ -250,6 +274,9 @@ def run(prompt: str, num_turns: int = 3, headless: bool = True) -> Dict[str, Any
             avg_trust[agent1] = trust_sum / (len(agent_names) - 1) if len(agent_names) > 1 else 0
         
         metrics["avg_trust"] = avg_trust
+        
+        # Add final reward summary
+        metrics["reward_summary"] = reward_system.get_reward_summary()
         
         # Write metrics to file
         metrics_file = get_metrics_path()
