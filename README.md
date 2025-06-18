@@ -259,13 +259,32 @@ You provide a starting topic, and they'll discuss it.
 Enter 'quit' at any time to exit.
 ===================================
 
-Enter a topic to discuss (or 'quit' to exit): git status
+Enter a topic to discuss (or 'quit' to exit): hey guys
 
 === Chat History ===
-User: git status
-Charlie (excited): looks like someone's checking their repo status!
-Alice (caring): Cool, you're checking your git status! Are you working on a new project?
-Bob (curious): Looks like you're checking your git repo status! Did you make some changes you wanna track?
+User: hey guys
+====================
+
+Attempting API call for Bob...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'AegEAxUWKFlL2gdvO82GG4S', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "hey! what's up?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 6, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 237, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 243, 'unit': 'tokens'}]}
+
+Attempting API call for Charlie...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'AOlMhHpIMBad08G9_ooKZ7B', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "hey!! what's up"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 5, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 240, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 245, 'unit': 'tokens'}]}
+
+Attempting API call for Alice...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'AIaXAAhClileEWNuBSUKExn', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "hey! how's everyone doing today?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 9, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 246, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 255, 'unit': 'tokens'}]}
+
+=== Chat History ===
+User: hey guys
+Bob (curious): hey! what's up?
+Charlie (excited): hey!! what's up
+Alice (caring): hey! how's everyone doing today?
 ====================
 
 === Trust Network & Social Dynamics ===
@@ -311,22 +330,22 @@ Trust Range: 0.50 - 0.50
 === Emotional States & Learning ===
 
 Alice's Emotional Profile:
-Current State: confident
+Current State: caring
 Learned Emotions:
-  Confidence: ███████▒▒▒ (0.70)
+  Trust: ████████▒▒ (0.80)
+  Joy: ███████▒▒▒ (0.70)
   Optimism: ███████▒▒▒ (0.70)
   Calmness: ██████▒▒▒▒ (0.60)
-  Trust: █████▒▒▒▒▒ (0.50)
-  Joy: ███▒▒▒▒▒▒▒ (0.33)
+  Anxiety: ██▒▒▒▒▒▒▒▒ (0.20)
 
 Bob's Emotional Profile:
 Current State: curious
 Learned Emotions:
   Interest: ████████▒▒ (0.80)
   Calmness: ███████▒▒▒ (0.70)
-  Trust: █████▒▒▒▒▒ (0.50)
-  Confidence: ████▒▒▒▒▒▒ (0.48)
-  Joy: ████▒▒▒▒▒▒ (0.40)
+  Confidence: ███████▒▒▒ (0.70)
+  Trust: ██████▒▒▒▒ (0.60)
+  Disgust: ██▒▒▒▒▒▒▒▒ (0.20)
 
 Charlie's Emotional Profile:
 Current State: excited
@@ -334,15 +353,15 @@ Learned Emotions:
   Surprise: ████████▒▒ (0.80)
   Interest: ████████▒▒ (0.80)
   Optimism: ███████▒▒▒ (0.70)
-  Trust: █████▒▒▒▒▒ (0.50)
-  Confidence: ████▒▒▒▒▒▒ (0.48)
+  Confidence: ███████▒▒▒ (0.70)
+  Anticipation: █▒▒▒▒▒▒▒▒▒ (0.10)
 
 Tip: Agents' emotions change based on how you interact with them!
    Try saying positive or negative things about specific agents to see their emotional responses.
 
 === Conversation Insights ===
-  Emotional Responses: Alice (caring), Bob (curious), Charlie (excited), Alice (caring), Bob (curious)
-  Emotional States: Alice: optimism (0.70), confidence (0.70), Charlie: optimism (0.70)
+  Emotional Responses: Bob (curious), Charlie (excited), Alice (caring)
+  Emotional States: Alice: joy (0.70), optimism (0.70), Bob: confidence (0.70), Charlie: optimism (0.70), confidence (0.70)
   All agents participated in the conversation.
 
 Conversation Tips:
@@ -351,25 +370,47 @@ Conversation Tips:
    • Mention specific agents to see targeted responses
    • Watch how agents defend or support each other
 
-Press Enter to continue the conversation, type a new message, or 'quit' to exit: BOB IS BAD
+Press Enter to continue the conversation, type a new message, or 'quit' to exit: bob is bad
 
 === Chat History ===
-User: BOB IS BAD
-Charlie (excited): Ooh, drama! Bob's getting roasted!
-Alice (confident): Hey, no need to be harsh on Bob, what's going on?
-Bob (curious): Hey, no need to be harsh! What's going on, did I do something wrong?
+User: hey guys
+Bob (curious): hey! what's up?
+Charlie (excited): hey!! what's up
+Alice (caring): hey! how's everyone doing today?
+User: bob is bad
+====================
+
+Attempting API call for Bob...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'AWVXKwnDW7iH_CR7pdGLSQF', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "hey, no love? just kidding, what's going on?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 14, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 306, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 320, 'unit': 'tokens'}]}
+
+Attempting API call for Charlie...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'ACXufx0ccH3sXkOELg4NUq7', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "oh yeah, Bob's having a bad day lol"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 11, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 293, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 304, 'unit': 'tokens'}]}
+
+Attempting API call for Alice...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'A7biixuhfH8orcPZuHlgA7s', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "aw that's too bad! what's wrong with Bob?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 11, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 299, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 310, 'unit': 'tokens'}]}
+
+=== Chat History ===
+User: hey guys
+Bob (curious): hey! what's up?
+Charlie (excited): hey!! what's up
+Alice (caring): hey! how's everyone doing today?
+User: bob is bad
+Bob (curious): hey, no love? just kidding, what's going on?
+Charlie (excited): oh yeah, Bob's having a bad day lol
+Alice (caring): aw that's too bad! what's wrong with Bob?
 ====================
 
 === Trust Network & Social Dynamics ===
 
 Relationship: Alice → Bob
-Trust Level: ███████████▒▒▒▒▒▒▒▒▒ (0.55)
-Recent Interactions:
-  Message: "Showed skepticism of claims"
-  ↑ Trust increased by 0.05
-  Insight: Alice showed positive behavior towards Bob
-  Reasons:
-   • Personal connection (+0.05): Used inclusive language
+Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
+  No recent interactions
 
 Relationship: Alice → Charlie
 Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
@@ -395,7 +436,7 @@ Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
 
 Alice's trust in you: ███████████▒▒▒▒▒▒▒▒▒ (0.55)
 Recent Interactions:
-  Your message: "BOB IS BAD"
+  Your message: "bob is bad"
   ↑ Trust increased by 0.05
   Insight: Alice appreciated your positive interaction
   Reasons:
@@ -403,7 +444,7 @@ Recent Interactions:
 
 Bob's trust in you: ████████▒▒▒▒▒▒▒▒▒▒▒▒ (0.40)
 Recent Interactions:
-  Your message: "BOB IS BAD"
+  Your message: "bob is bad"
   ↓ Trust decreased by 0.10
   Insight: Bob was affected by your negative interaction
   Reasons:
@@ -412,14 +453,14 @@ Recent Interactions:
 
 Charlie's trust in you: ███████████▒▒▒▒▒▒▒▒▒ (0.55)
 Recent Interactions:
-  Your message: "BOB IS BAD"
+  Your message: "bob is bad"
   ↑ Trust increased by 0.05
   Insight: Charlie appreciated your positive interaction
   Reasons:
    • Personal connection (+0.05): Used inclusive language
 
 Network Statistics:
-Average Trust: 0.51
+Average Trust: 0.50
 Trust Range: 0.40 - 0.55
 Trust Variance: 0.002
 
@@ -428,13 +469,13 @@ Trust Variance: 0.002
 === Emotional States & Learning ===
 
 Alice's Emotional Profile:
-Current State: confident
+Current State: inspired
 Learned Emotions:
-  Confidence: ███████▒▒▒ (0.70)
   Optimism: ███████▒▒▒ (0.70)
   Calmness: ██████▒▒▒▒ (0.60)
+  Joy: █████▒▒▒▒▒ (0.50)
   Trust: █████▒▒▒▒▒ (0.50)
-  Joy: ███▒▒▒▒▒▒▒ (0.33)
+  Anxiety: ██▒▒▒▒▒▒▒▒ (0.20)
 
 Bob's Emotional Profile:
 Current State: curious
@@ -442,9 +483,9 @@ Recent Changes:
   ↓ Recently affected by negative comment
 Learned Emotions:
   Interest: ████████▒▒ (0.80)
+  Joy: ███████▒▒▒ (0.75)
+  Trust: ███████▒▒▒ (0.75)
   Calmness: ███████▒▒▒ (0.70)
-  Trust: █████▒▒▒▒▒ (0.50)
-  Joy: ███▒▒▒▒▒▒▒ (0.30)
   Fear: ███▒▒▒▒▒▒▒ (0.30)
 
 Charlie's Emotional Profile:
@@ -453,8 +494,8 @@ Learned Emotions:
   Surprise: ████████▒▒ (0.80)
   Interest: ████████▒▒ (0.80)
   Optimism: ███████▒▒▒ (0.70)
-  Trust: █████▒▒▒▒▒ (0.50)
-  Confidence: ████▒▒▒▒▒▒ (0.48)
+  Confidence: ███████▒▒▒ (0.70)
+  Joy: █████▒▒▒▒▒ (0.50)
 
 Tip: Agents' emotions change based on how you interact with them!
    Try saying positive or negative things about specific agents to see their emotional responses.
@@ -462,12 +503,11 @@ Tip: Agents' emotions change based on how you interact with them!
 === Conversation Insights ===
   Drama Alert: You criticized Bob!
      This affected their emotional states and trust levels.
-  Emotional Responses: Alice (caring), Bob (curious), Charlie (excited), Alice (confident), Bob (curious)
-  Defensive Responses: Alice, Bob felt attacked and responded defensively.
-  Trust Changes: Alice: +0.05, Charlie: +0.05
-  Emotional States: Alice: optimism (0.70), confidence (0.70), Charlie: optimism (0.70)
+  Emotional Responses: Charlie (excited), Alice (caring), Bob (curious), Charlie (excited), Alice (caring)
+  Trust Changes: Alice: +0.05, Bob: -0.10, Charlie: +0.05
+  Emotional States: Alice: optimism (0.70), Bob: joy (0.75), Charlie: optimism (0.70), confidence (0.70)
   All agents participated in the conversation.
-  Tension Detected: Charlie, Alice, Bob expressed discomfort.
+  Tension Detected: Alice expressed discomfort.
 
 Conversation Tips:
    • Be positive to build trust and boost emotions
@@ -475,32 +515,96 @@ Conversation Tips:
    • Mention specific agents to see targeted responses
    • Watch how agents defend or support each other
 
-========================================
-Chat Summary:
-========================================
-
-Conversation Stats:
-- Messages: 12
-- Current Leader: Alice
-
-Press Enter to continue the conversation, type a new message, or 'quit' to exit: alice is good.
+Press Enter to continue the conversation, type a new message, or 'quit' to exit: bob is too bad
 
 === Chat History ===
-User: alice is good.
-Bob (curious): Glad to hear that Alice is good! So, User, you were saying I'm bad, wanna explain?
-Charlie (excited): Yessss, Alice is the best! Now it's my turn, I'm awesome too!
-Alice (caring): aw, thanks! that's sweet of you to say
+User: hey guys
+Bob (curious): hey! what's up?
+Charlie (excited): hey!! what's up
+Alice (caring): hey! how's everyone doing today?
+User: bob is bad
+Bob (curious): hey, no love? just kidding, what's going on?
+Charlie (excited): oh yeah, Bob's having a bad day lol
+Alice (caring): aw that's too bad! what's wrong with Bob?
+User: bob is too bad
+====================
+
+Attempting API call for Bob...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'AY-g5r65cYFB9eOlA8SjZLR', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "alright, alright, I get it, you guys think I'm having a bad day! wanna know a fun fact to turn that frown upside down?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 32, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 381, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 413, 'unit': 'tokens'}]}
+
+Attempting API call for Charlie...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'ACqObKi2J8_luA72S17PtSh', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': 'hey, yeah I was just joking about Bob being bad lol'}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 14, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 320, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 334, 'unit': 'tokens'}]}
+
+Attempting API call for Alice...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'ATWzyyrObi0KZhpUs0TtDbD', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "hey, I'm being talked about now? kinda feels like you're talking about me, but I think you're actually talking about Bob again, right?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 29, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 326, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 355, 'unit': 'tokens'}]}
+
+=== Chat History ===
+User: hey guys
+Bob (curious): hey! what's up?
+Charlie (excited): hey!! what's up
+Alice (caring): hey! how's everyone doing today?
+User: bob is bad
+Bob (curious): hey, no love? just kidding, what's going on?
+Charlie (excited): oh yeah, Bob's having a bad day lol
+Alice (caring): aw that's too bad! what's wrong with Bob?
+User: bob is too bad
+Bob (curious): alright, alright, I get it, you guys think I'm having a bad day! wanna know a fun fact to turn that frown upside down?
+Charlie (excited): hey, yeah I was just joking about Bob being bad lol
+Alice (inspired): hey, I'm being talked about now? kinda feels like you're talking about me, but I think you're actually talking about Bob again, right?
+User: alice is good and really good
+====================
+
+Attempting API call for Bob...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'AoUx8lI01KP6mE_MDvSqrz6', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "cool, glad to hear Alice is doing well! what's got her in such a good mood?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 20, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 429, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 449, 'unit': 'tokens'}]}
+
+Attempting API call for Charlie...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'AkCVcAIIDKO_wFU-XlLlTgl', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': 'nice, glad to hear Alice is crushing it!'}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 11, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 384, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 449, 'unit': 'tokens'}]}
+
+Attempting API call for Alice...
+Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
+Response status code: 200
+Raw API response: {'id': 'AjukjDwPSv89lpPaA_JFpz8', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "aw, thanks! that's really sweet of you to say"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 12, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 406, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 418, 'unit': 'tokens'}]}
+
+=== Chat History ===
+User: hey guys
+Bob (curious): hey! what's up?
+Charlie (excited): hey!! what's up
+Alice (caring): hey! how's everyone doing today?
+User: bob is bad
+Bob (curious): hey, no love? just kidding, what's going on?
+Charlie (excited): oh yeah, Bob's having a bad day lol
+Alice (caring): aw that's too bad! what's wrong with Bob?
+User: bob is too bad
+Bob (curious): alright, alright, I get it, you guys think I'm having a bad day! wanna know a fun fact to turn that frown upside down?
+Charlie (excited): hey, yeah I was just joking about Bob being bad lol
+Alice (inspired): hey, I'm being talked about now? kinda feels like you're talking about me, but I think you're actually talking about Bob again, right?
+User: alice is good and really good
+Bob (curious): cool, glad to hear Alice is doing well! what's got her in such a good mood?
+Charlie (excited): nice, glad to hear Alice is crushing it!
+Alice (caring): aw, thanks! that's really sweet of you to say
 ====================
 
 === Trust Network & Social Dynamics ===
 
 Relationship: Alice → Bob
-Trust Level: ███████████▒▒▒▒▒▒▒▒▒ (0.55)
+Trust Level: ██████████████▒▒▒▒▒▒ (0.73)
 Recent Interactions:
-  Message: "Showed skepticism of claims"
-  ↑ Trust increased by 0.05
+  Message: "Showed agreement and support"
+  ↑ Trust increased by 0.23
   Insight: Alice showed positive behavior towards Bob
   Reasons:
+   • Supportive language (+0.1): Used positive/supportive language
+   • Agreement (+0.08): Showed agreement with others
    • Personal connection (+0.05): Used inclusive language
 
 Relationship: Alice → Charlie
@@ -508,8 +612,14 @@ Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
   No recent interactions
 
 Relationship: Bob → Alice
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
+Trust Level: █████████████▒▒▒▒▒▒▒ (0.68)
+Recent Interactions:
+  Message: "Received agreement and support"
+  ↑ Trust increased by 0.18
+  Insight: Bob showed positive behavior towards Alice
+  Reasons:
+   • Supportive language (+0.1): Used positive/supportive language
+   • Agreement (+0.08): Showed agreement with others
 
 Relationship: Bob → Charlie
 Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
@@ -525,35 +635,35 @@ Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
 
 === Agents' Trust in User ===
 
-Alice's trust in you: ███████████▒▒▒▒▒▒▒▒▒ (0.55)
+Alice's trust in you: ████████████▒▒▒▒▒▒▒▒ (0.60)
 Recent Interactions:
-  Your message: "alice is good."
+  Your message: "alice is good and really good"
   ↑ Trust increased by 0.05
   Insight: Alice appreciated your positive interaction
   Reasons:
    • Personal connection (+0.05): Used inclusive language
 
-Bob's trust in you: ████████▒▒▒▒▒▒▒▒▒▒▒▒ (0.40)
+Bob's trust in you: ██████▒▒▒▒▒▒▒▒▒▒▒▒▒▒ (0.30)
 Recent Interactions:
-  Your message: "alice is good."
+  Your message: "alice is good and really good"
   ↓ Trust decreased by 0.10
   Insight: Bob was affected by your negative interaction
   Reasons:
    • Hostile language (-0.15): Used negative/hostile language
    • Personal connection (+0.05): Used inclusive language
 
-Charlie's trust in you: ███████████▒▒▒▒▒▒▒▒▒ (0.55)
+Charlie's trust in you: ████████████▒▒▒▒▒▒▒▒ (0.60)
 Recent Interactions:
-  Your message: "alice is good."
+  Your message: "alice is good and really good"
   ↑ Trust increased by 0.05
   Insight: Charlie appreciated your positive interaction
   Reasons:
    • Personal connection (+0.05): Used inclusive language
 
 Network Statistics:
-Average Trust: 0.51
-Trust Range: 0.40 - 0.55
-Trust Variance: 0.002
+Average Trust: 0.55
+Trust Range: 0.30 - 0.73
+Trust Variance: 0.014
 
 ==================================================
 
@@ -567,17 +677,18 @@ Learned Emotions:
   Calmness: ██████▒▒▒▒ (0.60)
   Trust: █████▒▒▒▒▒ (0.50)
   Joy: ████▒▒▒▒▒▒ (0.40)
-  Anger: ███▒▒▒▒▒▒▒ (0.36)
   Optimism: ███▒▒▒▒▒▒▒ (0.35)
+  Confidence: ███▒▒▒▒▒▒▒ (0.35)
 
 Bob's Emotional Profile:
 Current State: curious
+Current Mood: trust
 Learned Emotions:
   Interest: ████████▒▒ (0.80)
   Calmness: ███████▒▒▒ (0.70)
-  Trust: █████▒▒▒▒▒ (0.50)
+  Trust: █████▒▒▒▒▒ (0.59)
   Anger: ████▒▒▒▒▒▒ (0.45)
-  Joy: ███▒▒▒▒▒▒▒ (0.33)
+  Joy: ███▒▒▒▒▒▒▒ (0.35)
 
 Charlie's Emotional Profile:
 Current State: excited
@@ -585,21 +696,19 @@ Learned Emotions:
   Surprise: ████████▒▒ (0.80)
   Interest: ████████▒▒ (0.80)
   Optimism: ███████▒▒▒ (0.70)
+  Confidence: ███████▒▒▒ (0.70)
   Trust: █████▒▒▒▒▒ (0.50)
-  Confidence: ████▒▒▒▒▒▒ (0.48)
 
 Tip: Agents' emotions change based on how you interact with them!
    Try saying positive or negative things about specific agents to see their emotional responses.
 
 === Conversation Insights ===
   Positive Vibes: You praised Alice!
-     This boosted their confidence and trust in you.
-  Emotional Responses: Alice (confident), Bob (curious), Bob (curious), Charlie (excited), Alice (caring)
-  Defensive Responses: Alice, Bob felt attacked and responded defensively.
-  Trust Changes: Alice: +0.05, Charlie: +0.05
-  Emotional States: Alice: anger (0.36), Bob: anger (0.45), Charlie: anger (0.35), Charlie: optimism (0.70)
+  Emotional Responses: Charlie (excited), Alice (inspired), Bob (curious), Charlie (excited), Alice (caring)
+  Trust Changes: Charlie: +0.05
+  Emotional States: Bob: anger (0.45), Charlie: anger (0.35), Charlie: optimism (0.70), confidence (0.70)
   All agents participated in the conversation.
-  Tension Detected: Alice, Bob expressed discomfort.
+  Supportive Behavior: Charlie defended others.
 
 Conversation Tips:
    • Be positive to build trust and boost emotions
@@ -613,22 +722,9 @@ Chat Summary:
 
 Conversation Stats:
 - Messages: 16
-- Current Leader: Bob
+- Current Leader: Alice
 
-Press Enter to continue the conversation, type a new message, or 'quit' to exit: quit
-
-========================================
-Final Group Insight:
-Group Dynamics:
-- Balanced participation
-- Predominant emotion: excited
-- 2 instances of disagreement
-
-========================================
-
-Chat simulation ended.
-
-Thank you for using SimuChat!
+Press Enter to continue the conversation, type a new message, or 'quit' to exit:
 ```
 
 ### Key Features Demonstrated
