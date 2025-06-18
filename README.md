@@ -793,37 +793,6 @@ Bob: "I agree with Alice's analysis. Her approach is well-reasoned."
 - **Extended conversation contexts** with memory consolidation
 - **Group dynamics modeling** for larger agent societies
 
-## Citation
-
-If you use SimuChat in your research, please cite:
-
-```bibtex
-@article{simuchat2024,
-  title={SimuChat: A Terminal-Based Multi-Agent AI Society with Emotional Intelligence and Trust Modeling},
-  author={Seetha Ram, Gokul Srinath and Kumar, Khamalesh and Elavazh, Rashmi},
-  year={2024},
-  journal={Multi-Agent Systems and Social AI},
-  volume={1},
-  pages={1--15}
-}
-```
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contact
-
-For questions, suggestions, or collaboration opportunities:
-- **Gokul Srinath Seetha Ram**: [email]
-- **Khamalesh Kumar**: [email]  
-- **Rashmi Elavazh**: [email]
-
-## Acknowledgments
-
-We thank the Meta LLaMA team for providing the language model API, and the open-source community for the various libraries and tools that made this project possible.
-
----
 
 *SimuChat represents a step forward in creating more socially intelligent AI systems that can understand and simulate complex human-like interactions through mathematical modeling of emotions and trust dynamics.*
 
