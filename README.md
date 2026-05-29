@@ -1,798 +1,313 @@
-# SimuChat: A Terminal-Based Multi-Agent AI Society with Emotional Intelligence and Trust Modeling
+# SimuChat — Social Consensus RL Environment
 
-**Team Members:**  
-Gokul Srinath Seetha Ram, Khamalesh Kumar, Rashmi Elavazhagan
+<div align="center">
 
-## Abstract
+**Built for the Nous Research × Cerebral Valley RL Environments Hackathon**
+📍 San Francisco · May 18, 2025
 
-SimuChat is a novel multi-agent conversational AI system that simulates complex social dynamics through emotional intelligence, trust modeling, and personality-driven interactions. The system creates a miniature AI society where agents exhibit realistic emotional responses, form trust relationships, and engage in meaningful dialogue that evolves over time.
+[![Nous Research](https://img.shields.io/badge/Nous_Research-RL_Hackathon-blue)](https://github.com/NousResearch/atropos)
+[![Cerebral Valley](https://img.shields.io/badge/Hosted_By-Cerebral_Valley-purple)](https://cerebralvalley.ai)
+[![Atropos](https://img.shields.io/badge/Framework-Atropos-green)](https://github.com/NousResearch/atropos)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-orange)](https://python.org)
+[![Gymnasium](https://img.shields.io/badge/Gymnasium-Compatible-red)](https://gymnasium.farama.org)
 
-## Motivation
+**Author:** Gokul Srinath Seetha Ram
+**Team:** Gokul Srinath Seetha Ram · Khamalesh Kumar · Rashmi Elavazhagan
 
-Traditional chatbot systems lack the capacity to simulate multi-agent interactions, especially when emotional state, memory, and inter-agent relationships like trust are essential to meaningful dialogue. SimuChat addresses this gap by modeling a miniature AI society in the terminal, simulating complex interpersonal dynamics between autonomous agents through personality-driven dialogue.
+</div>
 
-## System Overview
+---
 
-SimuChat is a command-line simulation of a WhatsApp-style group chat, where:
+> *"Good environments thrive on domain expertise and thinking outside the box."*
+> — Nous Research Hackathon Brief
 
-- **Agents possess distinct personalities** (kind, logical, bold) with unique emotional profiles
-- **Each message interaction triggers changes** in trust, emotion, and memory through mathematical models
-- **An LLM (Meta LLaMA-4-Maverick-17B)** generates context-rich, personalized responses
-- **Emotional contagion** spreads between agents based on trust relationships and personality compatibility
-- **Trust dynamics** evolve through interaction patterns, emotional alignment, and behavioral consistency
+---
 
-### Mathematical Framework
+## What Is This?
 
-The system employs several mathematical models to simulate realistic social dynamics:
+SimuChat is a **Gymnasium-compatible Reinforcement Learning environment** that trains LLM agents to navigate complex social dynamics — trust-building, consensus formation, persuasion, and disagreement — inside a simulated multi-agent group chat.
 
-#### 1. Emotional Contagion Model
+Most existing RL environments for LLMs reward **task correctness** (math, code, tool-calling). SimuChat explores an orthogonal axis: **social intelligence** — the ability to steer a group from disagreement toward consensus using only conversational actions as levers.
 
-The emotional contagion effect is calculated using a weighted influence model:
+This was built for the **Nous Research × Cerebral Valley RL Environments Hackathon** (May 18, 2025, San Francisco), hacking on [Atropos](https://github.com/NousResearch/atropos) — Nous Research's async RL environment framework for LLMs.
 
-```
-Contagion Effect = Σ(Emotion_Intensity × Influence_Weight × Base_Rate × (1 - Resistance))
-```
+---
 
-Where:
-- **Influence_Weight** = Trust_Score × Trust_Weight + Proximity_Score × Proximity_Weight
-- **Resistance** = (1 - Empathy) × Personality_Weight + Stability × (1 - Personality_Weight)
-- **Base_Rate** = 0.3 (default contagion rate)
-- **Trust_Weight** = 0.4, **Proximity_Weight** = 0.3, **Personality_Weight** = 0.3
+## The Core Idea
 
-#### 2. Trust Update Model
+Three LLM agents with distinct personalities are placed on a controversial topic (climate change, AI ethics, UBI, etc.). They start with neutral trust and neutral opinions. A policy learns to assign **social actions** to each agent turn — AGREE, DISAGREE, PERSUADE, PROVIDE_EVIDENCE, SEEK_CONSENSUS — to steer the group from disagreement to consensus as efficiently as possible.
 
-Trust changes are computed through a multi-factor analysis:
+The reward is **emergent, not labeled**. No ground truth. Reward flows from trust dynamics, agreement convergence, and a penalty for increasing polarization.
 
-```
-Trust_Delta = Emotional_Alignment × 0.1 + Personality_Compatibility × 0.1 + 
-              Content_Sentiment × 0.05 + Emotional_State_Impact × 0.05
-```
+---
 
-Where:
-- **Emotional_Alignment** = (Same_Bias ? 0.4 : 0) + (1 - Intensity_Diff) × 0.3 + Shared_Emotions_Ratio × 0.3
-- **Personality_Compatibility** = Trait_Similarity_Score
-- **Content_Sentiment** = (Positive_Words - Negative_Words) × 0.05
-
-#### 3. Emotional State Evolution
-
-Emotions decay over time following an exponential decay model:
+## Architecture
 
 ```
-Emotion_Intensity(t) = Emotion_Intensity(t-1) × exp(-Decay_Rate × Time_Delta)
++------------------------------------------------------------------+
+|                     SocialConsensusEnv                           |
+|                  (Gymnasium-compatible)                          |
+|                                                                  |
+|  +----------+  action (0-7)  +-----------------------------+    |
+|  |  Policy  | -------------> |         EnvState            |    |
+|  | (PPO/DQN |                |  - Trust matrix  (3x3)      |    |
+|  | /QLearning <------------- |  - Emotion vecs  (3x8)      |    |
+|  | /LLMAgent)  observation   |  - Agreement     (3,)       |    |
+|  +----------+                |  - Conversation history     |    |
+|                              +---------------+-------------+    |
+|                                              |                   |
+|                              +---------------v-------------+    |
+|                              |      DeepInfra LLM          |    |
+|                              |  Llama-3.1-8B-Turbo         |    |
+|                              |  (generates agent response) |    |
+|                              +---------------+-------------+    |
+|                                              |                   |
+|                              +---------------v-------------+    |
+|                              |      RewardFunction         |    |
+|                              |  +1  trust build            |    |
+|                              |  +5  consensus reached      |    |
+|                              |  +2  evidence shifts group  |    |
+|                              |  -1  trust destroyed        |    |
+|                              |  -3  polarization rises     |    |
+|                              +-----------------------------+    |
++------------------------------------------------------------------+
+                          |
+         +----------------v----------------+
+         |         AtroposAdapter          |
+         |  {prompt, completion, reward}   |
+         |  -> trainer.add_batch()         |
+         |  (Atropos ScoredDataGroup fmt)  |
+         +---------------------------------+
 ```
 
-Where **Decay_Rate** = 0.1 per conversation turn.
+---
 
-#### 4. Personality-Based Initial States
+## Agents
 
-Initial emotional states are set based on personality traits:
+| Agent | Personality | Emotional Bias |
+|-------|-------------|----------------|
+| **Alice** | Empathetic, warm, seeks harmony | Joy, Trust, Calmness |
+| **Bob** | Analytical, methodical, evidence-driven | Confidence, Interest, Stability |
+| **Charlie** | Bold, assertive, competitive | Optimism, Surprise, Confidence |
+
+---
+
+## State Space
+
+```python
+observation = {
+    "trust_matrix":     np.float32,  # (3, 3) — pairwise trust between all agents
+    "emotion_vectors":  np.float32,  # (3, 8) — 8-dim emotion per agent
+    "agreement_scores": np.float32,  # (3,)   — how aligned each agent is
+    "current_round":    int,         # episode progress
+    "current_agent":    int,         # 0=Alice, 1=Bob, 2=Charlie
+}
+```
+
+---
+
+## Action Space — 8 Discrete Social Actions
+
+| ID | Action | Effect |
+|----|--------|--------|
+| 0 | `AGREE` | Validates group direction, builds trust |
+| 1 | `DISAGREE` | Introduces tension, reduces trust |
+| 2 | `PERSUADE` | Shifts others toward own view |
+| 3 | `QUESTION` | Requests evidence/clarification, neutral |
+| 4 | `SUPPORT` | Reinforces another agent's position |
+| 5 | `CHALLENGE` | Directly disputes a claim |
+| 6 | `PROVIDE_EVIDENCE` | Grounds discussion in facts, strong trust builder |
+| 7 | `SEEK_CONSENSUS` | Explicitly moves toward agreement |
+
+---
+
+## Reward Function
 
 ```
-Initial_Emotion = Base_Personality_Trait × Personality_Weight + 
-                  Random_Component × (1 - Personality_Weight)
+R = sum(trust_build)   +1.0 per agent pair where trust increased > 0.01
+  + consensus          +5.0 one-time when all agreements exceed threshold
+  + evidence           +2.0 when PROVIDE_EVIDENCE raises group agreement > 0.02
+  + sum(conflict)      -1.0 per agent pair where trust dropped > 0.01
+  + polarization       -3.0 when std(agreement_scores) increases > 0.05
 ```
 
-## Key Features
+---
 
-### 1. Multi-Agent Emotional Intelligence
-- **8-dimensional emotional space**: joy/sadness, trust/disgust, fear/anger, surprise/anticipation, optimism/pessimism, calmness/anxiety, interest/boredom, confidence/uncertainty
-- **Emotional contagion** with personality-based resistance
-- **Emotional triggers** based on message content and agent history
-- **Mood persistence** with configurable duration
+## Emotional Contagion Model
 
-### 2. Dynamic Trust Modeling
-- **Bidirectional trust relationships** between all agent pairs
-- **Trust evolution** based on interaction quality, emotional alignment, and behavioral consistency
-- **Trust visualization** with real-time updates
-- **Trust-based influence** on emotional contagion
+After each full round (3 agent turns), emotions propagate via trust-weighted contagion:
 
-### 3. Personality-Driven Interactions
-- **Distinct agent personalities**: Alice (kind/empathetic), Bob (logical/analytical), Charlie (bold/assertive)
-- **Personality-consistent responses** generated by LLaMA-4-Maverick-17B
-- **Personality-based emotional triggers** and resistance to contagion
-- **Behavioral consistency tracking**
+```python
+# For each agent i, each emotion e:
+emotion[i][e] += sum(trust[i][j] * 0.3 * (emotion[j][e] - emotion[i][e]) for j != i)
+emotion        *= exp(-0.05)   # exponential decay per turn
+```
 
-### 4. Real-Time Insights System
-- **Conversation analysis** after each interaction round
-- **Emotional state tracking** with change explanations
-- **Trust relationship dynamics** visualization
-- **Social interaction patterns** identification
-- **Defensive behavior detection** and analysis
+Agents emotionally synchronize with agents they trust — creating non-stationary, realistic social dynamics that make credit assignment genuinely hard.
 
-## Technical Architecture
+---
 
-### Backend Components
-- **Python-based simulation engine** with modular design
-- **Meta LLaMA-4-Maverick-17B API integration** for natural language generation
-- **Emotional intelligence engine** with mathematical modeling
-- **Trust engine** with relationship tracking
-- **Memory system** for conversation history and emotional states
+## Training Results — 50 Episodes Each
 
-### Frontend Interface
-- **Terminal-based chat interface** with real-time updates
-- **Emotional state displays** with intensity indicators
-- **Trust relationship visualization** using ASCII art
-- **Insights panel** with detailed analysis
-- **Interactive command system** for user engagement
+| Metric | Q-Learning | DQN | PPO |
+|--------|-----------|-----|-----|
+| Consensus Rate | 2.0% | 2.0% | **66.0%** |
+| Mean Reward | +19.80 | +15.99 | **+36.33** |
+| Max Reward | +36.36 | +35.94 | **+51.37** |
+| Mean Trust | 0.649 | 0.632 | **0.687** |
+| Mean Polarization | 0.071 | 0.077 | **0.050** |
+| Avg Rounds/Episode | 9.92 | 9.94 | **7.76** |
 
-### Data Management
-- **JSON-based configuration** for agent personalities and system settings
-- **Persistent storage** for conversation history and emotional states
-- **Real-time metrics tracking** for analysis and debugging
-- **Export capabilities** for research and analysis
+PPO learns to exploit the +5 consensus bonus by episode 20, reaching 66% consensus rate by episode 50. Consensus rate climbed 10% -> 30% -> 47% -> 58% -> 66% across training blocks.
 
-## Installation and Setup
+---
 
-### Prerequisites
-- Python 3.8+
-- Meta LLaMA API access
-- Required Python packages (see requirements.txt)
+## Atropos Integration
 
-### Quick Start
+```python
+from simuchat_rl.envs.social_consensus_env import SocialConsensusEnv
+from simuchat_rl.atropos.adapter import AtroposAdapter
+
+env = SocialConsensusEnv()
+obs, info = env.reset(options={"topic": "climate change"})
+
+# ... run episode ...
+
+# Get Atropos-compatible rollouts
+rollouts = env.get_rollout_for_atropos()
+# Each turn: {prompt, completion, reward, agent, action, round, metadata}
+
+# Format for trainer
+adapter = AtroposAdapter(normalize_rewards=True)
+batch = adapter.format_for_trainer([adapter.convert_episode(rollouts)])
+trainer.add_batch(batch)  # compatible with Atropos trainer.add_batch()
+```
+
+The ScoredDataGroup payload flows:
+`environment -> /scored_data -> API queue -> /batch -> trainer`
+exactly as the Atropos framework expects.
+
+---
+
+## Quick Start
+
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd simuchat
+git clone https://github.com/gokulsrinaths/Simuchat.git
+cd Simuchat
 
-# Install dependencies
-pip install -r requirements.txt
+pip install -r simuchat_rl/requirements.txt
 
-# Configure API settings
-# Edit config.py with your LLaMA API credentials
+# Add your DeepInfra key
+echo "DEEPINFRA_API_KEY=your_key_here" > .env
+export SIMUCHAT_MODEL=meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo
+export PYTHONIOENCODING=utf-8
 
-# Run the simulation
-python main.py
+# Run a single episode
+python run_episode.py
+
+# Train
+python simuchat_rl/training/train_ppo.py       --episodes 1000
+python simuchat_rl/training/train_dqn.py       --episodes 1000
+python simuchat_rl/training/train_qlearning.py --episodes 500
 ```
 
-### Configuration
-1. **API Setup**: Add your Meta LLaMA API key to `config.py`
-2. **Agent Configuration**: Modify `agents_config.json` to customize agent personalities
-3. **System Parameters**: Adjust emotional contagion and trust parameters in the respective modules
+---
 
-## Usage Examples
+## Supported Models (via DeepInfra)
 
-### Comprehensive Chat Example
+| Key | Model |
+|-----|-------|
+| `llama-3.1-8b-turbo` *(default)* | `meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo` |
+| `llama-3.1-8b` | `meta-llama/Meta-Llama-3.1-8B-Instruct` |
+| `llama-3.1-70b` | `meta-llama/Meta-Llama-3.1-70B-Instruct` |
+| `llama-3.3-70b` | `meta-llama/Llama-3.3-70B-Instruct` |
+| `qwen-72b` | `Qwen/Qwen2.5-72B-Instruct` |
+| `deepseek-v3` | `deepseek-ai/DeepSeek-V3` |
 
-Here's a complete conversation example demonstrating the system's capabilities:
+Set via: `export SIMUCHAT_MODEL=meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo`
 
-#### Initial Interaction
-```
-User: Hey Guys
+---
 
-Alice (curious, contemplative): 
-It seems like you're trying to start a conversation! I'm here to listen and help. How are you feeling today?
-
-Bob (frustrated, contemplative): 
-There is no "Guys" here, just me, Bob, an analytical AI. I'm functioning within normal parameters. What's on your mind?
-
-Charlie (confused, contemplative): 
-You're repeating the same greeting, which was already addressed by Alice and Bob. I'm Charlie, the bold and competitive AI, and I'm here to take the conversation to the next level. Let's dive into a debate or discussion, I'm ready to take the lead.
-```
-
-Trust Network Update:
-- Alice's trust in Bob: 0.50 → 0.51 (+0.01)
-- Alice's trust in Charlie: 0.50 → 0.51 (+0.01)
-- Bob's trust in Alice: 0.50 → 0.48 (-0.02)
-- Charlie's trust in Alice: 0.50 → 0.51 (+0.01)
-
-#### Topic Discussion
-```
-User: Talk about iPhone vs Android
-
-Alice (inspired, supportive): 
-Let's discuss iPhone vs Android in a way that focuses on how people feel about their choices. Some people value the ease and security of iPhones, while others prefer the customization options of Androids. What are your thoughts, and how do you feel about your own device?
-
-Bob (happy, contemplative): 
-To analyze the iPhone vs Android debate, let's examine the key differences in their design, functionality, and user experience. iPhones are known for their ease of use and security, while Androids offer more customization options. The choice between the two often depends on individual preferences and needs.
-
-Charlie (inspired, contemplative): 
-I'm Charlie, and I'll take a bolder stance - iPhones are for those who value simplicity, while Androids are for tech enthusiasts who crave control. Androids offer more flexibility and customization, making them the superior choice for power users. The open nature of Androids is unmatched.
-```
-
-Trust Network Evolution:
-- Alice's trust in Bob: 0.51 → 0.52 (+0.01)
-- Alice's trust in Charlie: 0.51 → 0.54 (+0.03)
-- Bob's trust in Alice: 0.48 → 0.51 (+0.03)
-- Bob's trust in Charlie: 0.50 → 0.54 (+0.04)
-- Charlie's trust in Alice: 0.51 → 0.50 (-0.01)
-- Charlie's trust in Bob: 0.50 → 0.53 (+0.03)
-
-#### Conversation Insights
-```
-=== Conversation Insights ===
-
-User Interaction Analysis:
-- User introduced topic: "iPhone vs Android"
-- Topic type: Technology comparison
-- Engagement level: High (detailed responses from all agents)
-
-Emotional Dynamics:
-- Alice: Maintained supportive and empathetic tone throughout
-- Bob: Shifted from frustrated to happy, showing analytical approach
-- Charlie: Displayed bold and competitive personality as expected
-
-Trust Relationship Changes:
-- Strongest trust increase: Bob → Charlie (+0.04) due to analytical alignment
-- Alice's trust in Charlie increased (+0.03) through emotional support
-- Overall group cohesion improved through topic engagement
-
-Social Dynamics:
-- All agents maintained personality consistency
-- Charlie took leadership role as expected
-- Bob provided analytical framework
-- Alice focused on emotional aspects and user feelings
-
-Interaction Tips:
-- Technology topics engage all personality types effectively
-- Analytical discussions increase trust between logical agents
-- Emotional support from Alice helps balance competitive dynamics
-```
-
-#### Conversation Conclusion
-```
-User: thanks a lot
-
-Alice (curious, supportive): 
-You're welcome! It was a pleasure discussing iPhone vs Android with you. I hope you feel more informed and confident about your mobile device choice.
-
-Bob (inspired, supportive): 
-It appears we've already had this conversation. To recap, the iPhone vs Android debate centers around design, functionality, and user experience. iPhones offer ease of use and security, while Androids provide customization options and flexibility.
-
-Charlie (confident, supportive): 
-You're welcome! I enjoyed taking a bold stance on the Android vs iPhone debate. It's always exciting to defend the superior choice and engage in passionate discussions about technology.
-```
-
-### Real Terminal Example
-
-Here's an actual terminal session showing the system in action:
+## Project Structure
 
 ```
-===== Welcome to SimuChat =====
-A WhatsApp-style AI Group Chat Simulation
-
-This application simulates a group chat between three AI agents:
-- Alice: Kind and empathetic
-- Bob: Logical and analytical
-- Charlie: Bold and competitive
-
-You provide a starting topic, and they'll discuss it.
-Enter 'quit' at any time to exit.
-===================================
-
-Enter a topic to discuss (or 'quit' to exit): hey guys
-
-=== Chat History ===
-User: hey guys
-====================
-
-Attempting API call for Bob...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'AegEAxUWKFlL2gdvO82GG4S', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "hey! what's up?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 6, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 237, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 243, 'unit': 'tokens'}]}
-
-Attempting API call for Charlie...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'AOlMhHpIMBad08G9_ooKZ7B', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "hey!! what's up"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 5, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 240, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 245, 'unit': 'tokens'}]}
-
-Attempting API call for Alice...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'AIaXAAhClileEWNuBSUKExn', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "hey! how's everyone doing today?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 9, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 246, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 255, 'unit': 'tokens'}]}
-
-=== Chat History ===
-User: hey guys
-Bob (curious): hey! what's up?
-Charlie (excited): hey!! what's up
-Alice (caring): hey! how's everyone doing today?
-====================
-
-=== Trust Network & Social Dynamics ===
-
-Relationship: Alice → Bob
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Alice → Charlie
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Bob → Alice
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Bob → Charlie
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Charlie → Alice
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Charlie → Bob
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-=== Agents' Trust in User ===
-
-Alice's trust in you: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-
-Bob's trust in you: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-
-Charlie's trust in you: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-
-Network Statistics:
-Average Trust: 0.50
-Trust Range: 0.50 - 0.50
-
-==================================================
-
-=== Emotional States & Learning ===
-
-Alice's Emotional Profile:
-Current State: caring
-Learned Emotions:
-  Trust: ████████▒▒ (0.80)
-  Joy: ███████▒▒▒ (0.70)
-  Optimism: ███████▒▒▒ (0.70)
-  Calmness: ██████▒▒▒▒ (0.60)
-  Anxiety: ██▒▒▒▒▒▒▒▒ (0.20)
-
-Bob's Emotional Profile:
-Current State: curious
-Learned Emotions:
-  Interest: ████████▒▒ (0.80)
-  Calmness: ███████▒▒▒ (0.70)
-  Confidence: ███████▒▒▒ (0.70)
-  Trust: ██████▒▒▒▒ (0.60)
-  Disgust: ██▒▒▒▒▒▒▒▒ (0.20)
-
-Charlie's Emotional Profile:
-Current State: excited
-Learned Emotions:
-  Surprise: ████████▒▒ (0.80)
-  Interest: ████████▒▒ (0.80)
-  Optimism: ███████▒▒▒ (0.70)
-  Confidence: ███████▒▒▒ (0.70)
-  Anticipation: █▒▒▒▒▒▒▒▒▒ (0.10)
-
-Tip: Agents' emotions change based on how you interact with them!
-   Try saying positive or negative things about specific agents to see their emotional responses.
-
-=== Conversation Insights ===
-  Emotional Responses: Bob (curious), Charlie (excited), Alice (caring)
-  Emotional States: Alice: joy (0.70), optimism (0.70), Bob: confidence (0.70), Charlie: optimism (0.70), confidence (0.70)
-  All agents participated in the conversation.
-
-Conversation Tips:
-   • Be positive to build trust and boost emotions
-   • Be negative to create drama and tension
-   • Mention specific agents to see targeted responses
-   • Watch how agents defend or support each other
-
-Press Enter to continue the conversation, type a new message, or 'quit' to exit: bob is bad
-
-=== Chat History ===
-User: hey guys
-Bob (curious): hey! what's up?
-Charlie (excited): hey!! what's up
-Alice (caring): hey! how's everyone doing today?
-User: bob is bad
-====================
-
-Attempting API call for Bob...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'AWVXKwnDW7iH_CR7pdGLSQF', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "hey, no love? just kidding, what's going on?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 14, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 306, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 320, 'unit': 'tokens'}]}
-
-Attempting API call for Charlie...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'ACXufx0ccH3sXkOELg4NUq7', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "oh yeah, Bob's having a bad day lol"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 11, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 293, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 304, 'unit': 'tokens'}]}
-
-Attempting API call for Alice...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'A7biixuhfH8orcPZuHlgA7s', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "aw that's too bad! what's wrong with Bob?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 11, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 299, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 310, 'unit': 'tokens'}]}
-
-=== Chat History ===
-User: hey guys
-Bob (curious): hey! what's up?
-Charlie (excited): hey!! what's up
-Alice (caring): hey! how's everyone doing today?
-User: bob is bad
-Bob (curious): hey, no love? just kidding, what's going on?
-Charlie (excited): oh yeah, Bob's having a bad day lol
-Alice (caring): aw that's too bad! what's wrong with Bob?
-====================
-
-=== Trust Network & Social Dynamics ===
-
-Relationship: Alice → Bob
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Alice → Charlie
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Bob → Alice
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Bob → Charlie
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Charlie → Alice
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Charlie → Bob
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-=== Agents' Trust in User ===
-
-Alice's trust in you: ███████████▒▒▒▒▒▒▒▒▒ (0.55)
-Recent Interactions:
-  Your message: "bob is bad"
-  ↑ Trust increased by 0.05
-  Insight: Alice appreciated your positive interaction
-  Reasons:
-   • Personal connection (+0.05): Used inclusive language
-
-Bob's trust in you: ████████▒▒▒▒▒▒▒▒▒▒▒▒ (0.40)
-Recent Interactions:
-  Your message: "bob is bad"
-  ↓ Trust decreased by 0.10
-  Insight: Bob was affected by your negative interaction
-  Reasons:
-   • Hostile language (-0.15): Used negative/hostile language
-   • Personal connection (+0.05): Used inclusive language
-
-Charlie's trust in you: ███████████▒▒▒▒▒▒▒▒▒ (0.55)
-Recent Interactions:
-  Your message: "bob is bad"
-  ↑ Trust increased by 0.05
-  Insight: Charlie appreciated your positive interaction
-  Reasons:
-   • Personal connection (+0.05): Used inclusive language
-
-Network Statistics:
-Average Trust: 0.50
-Trust Range: 0.40 - 0.55
-Trust Variance: 0.002
-
-==================================================
-
-=== Emotional States & Learning ===
-
-Alice's Emotional Profile:
-Current State: inspired
-Learned Emotions:
-  Optimism: ███████▒▒▒ (0.70)
-  Calmness: ██████▒▒▒▒ (0.60)
-  Joy: █████▒▒▒▒▒ (0.50)
-  Trust: █████▒▒▒▒▒ (0.50)
-  Anxiety: ██▒▒▒▒▒▒▒▒ (0.20)
-
-Bob's Emotional Profile:
-Current State: curious
-Recent Changes:
-  ↓ Recently affected by negative comment
-Learned Emotions:
-  Interest: ████████▒▒ (0.80)
-  Joy: ███████▒▒▒ (0.75)
-  Trust: ███████▒▒▒ (0.75)
-  Calmness: ███████▒▒▒ (0.70)
-  Fear: ███▒▒▒▒▒▒▒ (0.30)
-
-Charlie's Emotional Profile:
-Current State: excited
-Learned Emotions:
-  Surprise: ████████▒▒ (0.80)
-  Interest: ████████▒▒ (0.80)
-  Optimism: ███████▒▒▒ (0.70)
-  Confidence: ███████▒▒▒ (0.70)
-  Joy: █████▒▒▒▒▒ (0.50)
-
-Tip: Agents' emotions change based on how you interact with them!
-   Try saying positive or negative things about specific agents to see their emotional responses.
-
-=== Conversation Insights ===
-  Drama Alert: You criticized Bob!
-     This affected their emotional states and trust levels.
-  Emotional Responses: Charlie (excited), Alice (caring), Bob (curious), Charlie (excited), Alice (caring)
-  Trust Changes: Alice: +0.05, Bob: -0.10, Charlie: +0.05
-  Emotional States: Alice: optimism (0.70), Bob: joy (0.75), Charlie: optimism (0.70), confidence (0.70)
-  All agents participated in the conversation.
-  Tension Detected: Alice expressed discomfort.
-
-Conversation Tips:
-   • Be positive to build trust and boost emotions
-   • Be negative to create drama and tension
-   • Mention specific agents to see targeted responses
-   • Watch how agents defend or support each other
-
-Press Enter to continue the conversation, type a new message, or 'quit' to exit: bob is too bad
-
-=== Chat History ===
-User: hey guys
-Bob (curious): hey! what's up?
-Charlie (excited): hey!! what's up
-Alice (caring): hey! how's everyone doing today?
-User: bob is bad
-Bob (curious): hey, no love? just kidding, what's going on?
-Charlie (excited): oh yeah, Bob's having a bad day lol
-Alice (caring): aw that's too bad! what's wrong with Bob?
-User: bob is too bad
-====================
-
-Attempting API call for Bob...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'AY-g5r65cYFB9eOlA8SjZLR', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "alright, alright, I get it, you guys think I'm having a bad day! wanna know a fun fact to turn that frown upside down?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 32, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 381, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 413, 'unit': 'tokens'}]}
-
-Attempting API call for Charlie...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'ACqObKi2J8_luA72S17PtSh', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': 'hey, yeah I was just joking about Bob being bad lol'}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 14, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 320, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 334, 'unit': 'tokens'}]}
-
-Attempting API call for Alice...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'ATWzyyrObi0KZhpUs0TtDbD', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "hey, I'm being talked about now? kinda feels like you're talking about me, but I think you're actually talking about Bob again, right?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 29, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 326, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 355, 'unit': 'tokens'}]}
-
-=== Chat History ===
-User: hey guys
-Bob (curious): hey! what's up?
-Charlie (excited): hey!! what's up
-Alice (caring): hey! how's everyone doing today?
-User: bob is bad
-Bob (curious): hey, no love? just kidding, what's going on?
-Charlie (excited): oh yeah, Bob's having a bad day lol
-Alice (caring): aw that's too bad! what's wrong with Bob?
-User: bob is too bad
-Bob (curious): alright, alright, I get it, you guys think I'm having a bad day! wanna know a fun fact to turn that frown upside down?
-Charlie (excited): hey, yeah I was just joking about Bob being bad lol
-Alice (inspired): hey, I'm being talked about now? kinda feels like you're talking about me, but I think you're actually talking about Bob again, right?
-User: alice is good and really good
-====================
-
-Attempting API call for Bob...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'AoUx8lI01KP6mE_MDvSqrz6', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "cool, glad to hear Alice is doing well! what's got her in such a good mood?"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 20, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 429, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 449, 'unit': 'tokens'}]}
-
-Attempting API call for Charlie...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'AkCVcAIIDKO_wFU-XlLlTgl', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': 'nice, glad to hear Alice is crushing it!'}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 11, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 384, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 449, 'unit': 'tokens'}]}
-
-Attempting API call for Alice...
-Using model: Llama-4-Maverick-17B-128E-Instruct-FP8
-Response status code: 200
-Raw API response: {'id': 'AjukjDwPSv89lpPaA_JFpz8', 'completion_message': {'role': 'assistant', 'stop_reason': 'stop', 'content': {'type': 'text', 'text': "aw, thanks! that's really sweet of you to say"}}, 'metrics': [{'metric': 'num_completion_tokens', 'value': 12, 'unit': 'tokens'}, {'metric': 'num_prompt_tokens', 'value': 406, 'unit': 'tokens'}, {'metric': 'num_total_tokens', 'value': 418, 'unit': 'tokens'}]}
-
-=== Chat History ===
-User: hey guys
-Bob (curious): hey! what's up?
-Charlie (excited): hey!! what's up
-Alice (caring): hey! how's everyone doing today?
-User: bob is bad
-Bob (curious): hey, no love? just kidding, what's going on?
-Charlie (excited): oh yeah, Bob's having a bad day lol
-Alice (caring): aw that's too bad! what's wrong with Bob?
-User: bob is too bad
-Bob (curious): alright, alright, I get it, you guys think I'm having a bad day! wanna know a fun fact to turn that frown upside down?
-Charlie (excited): hey, yeah I was just joking about Bob being bad lol
-Alice (inspired): hey, I'm being talked about now? kinda feels like you're talking about me, but I think you're actually talking about Bob again, right?
-User: alice is good and really good
-Bob (curious): cool, glad to hear Alice is doing well! what's got her in such a good mood?
-Charlie (excited): nice, glad to hear Alice is crushing it!
-Alice (caring): aw, thanks! that's really sweet of you to say
-====================
-
-=== Trust Network & Social Dynamics ===
-
-Relationship: Alice → Bob
-Trust Level: ██████████████▒▒▒▒▒▒ (0.73)
-Recent Interactions:
-  Message: "Showed agreement and support"
-  ↑ Trust increased by 0.23
-  Insight: Alice showed positive behavior towards Bob
-  Reasons:
-   • Supportive language (+0.1): Used positive/supportive language
-   • Agreement (+0.08): Showed agreement with others
-   • Personal connection (+0.05): Used inclusive language
-
-Relationship: Alice → Charlie
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Bob → Alice
-Trust Level: █████████████▒▒▒▒▒▒▒ (0.68)
-Recent Interactions:
-  Message: "Received agreement and support"
-  ↑ Trust increased by 0.18
-  Insight: Bob showed positive behavior towards Alice
-  Reasons:
-   • Supportive language (+0.1): Used positive/supportive language
-   • Agreement (+0.08): Showed agreement with others
-
-Relationship: Bob → Charlie
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Charlie → Alice
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-Relationship: Charlie → Bob
-Trust Level: ██████████▒▒▒▒▒▒▒▒▒▒ (0.50)
-  No recent interactions
-
-=== Agents' Trust in User ===
-
-Alice's trust in you: ████████████▒▒▒▒▒▒▒▒ (0.60)
-Recent Interactions:
-  Your message: "alice is good and really good"
-  ↑ Trust increased by 0.05
-  Insight: Alice appreciated your positive interaction
-  Reasons:
-   • Personal connection (+0.05): Used inclusive language
-
-Bob's trust in you: ██████▒▒▒▒▒▒▒▒▒▒▒▒▒▒ (0.30)
-Recent Interactions:
-  Your message: "alice is good and really good"
-  ↓ Trust decreased by 0.10
-  Insight: Bob was affected by your negative interaction
-  Reasons:
-   • Hostile language (-0.15): Used negative/hostile language
-   • Personal connection (+0.05): Used inclusive language
-
-Charlie's trust in you: ████████████▒▒▒▒▒▒▒▒ (0.60)
-Recent Interactions:
-  Your message: "alice is good and really good"
-  ↑ Trust increased by 0.05
-  Insight: Charlie appreciated your positive interaction
-  Reasons:
-   • Personal connection (+0.05): Used inclusive language
-
-Network Statistics:
-Average Trust: 0.55
-Trust Range: 0.30 - 0.73
-Trust Variance: 0.014
-
-==================================================
-
-=== Emotional States & Learning ===
-
-Alice's Emotional Profile:
-Current State: thoughtful
-Recent Changes:
-  ↑ Recently affected by positive comment
-Learned Emotions:
-  Calmness: ██████▒▒▒▒ (0.60)
-  Trust: █████▒▒▒▒▒ (0.50)
-  Joy: ████▒▒▒▒▒▒ (0.40)
-  Optimism: ███▒▒▒▒▒▒▒ (0.35)
-  Confidence: ███▒▒▒▒▒▒▒ (0.35)
-
-Bob's Emotional Profile:
-Current State: curious
-Current Mood: trust
-Learned Emotions:
-  Interest: ████████▒▒ (0.80)
-  Calmness: ███████▒▒▒ (0.70)
-  Trust: █████▒▒▒▒▒ (0.59)
-  Anger: ████▒▒▒▒▒▒ (0.45)
-  Joy: ███▒▒▒▒▒▒▒ (0.35)
-
-Charlie's Emotional Profile:
-Current State: excited
-Learned Emotions:
-  Surprise: ████████▒▒ (0.80)
-  Interest: ████████▒▒ (0.80)
-  Optimism: ███████▒▒▒ (0.70)
-  Confidence: ███████▒▒▒ (0.70)
-  Trust: █████▒▒▒▒▒ (0.50)
-
-Tip: Agents' emotions change based on how you interact with them!
-   Try saying positive or negative things about specific agents to see their emotional responses.
-
-=== Conversation Insights ===
-  Positive Vibes: You praised Alice!
-  Emotional Responses: Charlie (excited), Alice (inspired), Bob (curious), Charlie (excited), Alice (caring)
-  Trust Changes: Charlie: +0.05
-  Emotional States: Bob: anger (0.45), Charlie: anger (0.35), Charlie: optimism (0.70), confidence (0.70)
-  All agents participated in the conversation.
-  Supportive Behavior: Charlie defended others.
-
-Conversation Tips:
-   • Be positive to build trust and boost emotions
-   • Be negative to create drama and tension
-   • Mention specific agents to see targeted responses
-   • Watch how agents defend or support each other
-
-========================================
-Chat Summary:
-========================================
-
-Conversation Stats:
-- Messages: 16
-- Current Leader: Alice
-
-Press Enter to continue the conversation, type a new message, or 'quit' to exit:
+Simuchat/
+├── simuchat_rl/                       <- RL environment (hackathon)
+│   ├── envs/
+│   │   ├── social_consensus_env.py    <- Gymnasium env (reset/step/render)
+│   │   ├── state.py                   <- Trust, emotion, agreement dynamics
+│   │   └── reward_fn.py               <- 5-component reward function
+│   ├── llm/
+│   │   └── deepinfra_client.py        <- DeepInfra API + fallback templates
+│   ├── agents/
+│   │   ├── llm_agent.py               <- LLM-driven JSON action selection
+│   │   └── baseline_agents.py         <- Random/Greedy/Consensus/Adversarial
+│   ├── training/
+│   │   ├── train_qlearning.py         <- Tabular Q-learning
+│   │   ├── train_dqn.py               <- DQN + replay buffer + target net
+│   │   └── train_ppo.py               <- Clipped PPO + GAE + ActorCritic
+│   ├── atropos/
+│   │   └── adapter.py                 <- Atropos rollout format adapter
+│   ├── metrics/
+│   │   └── tracker.py                 <- CSV/JSON/learning curve plots
+│   └── evaluation/
+│       └── evaluate.py                <- Multi-agent comparison suite
+├── environments/hack0/simuchat/       <- Original Atropos env structure
+├── checkpoints/                       <- Saved weights from training runs
+│   ├── qlearning/                     <- Q-table JSON checkpoints
+│   ├── dqn/                           <- DQN .pt checkpoints
+│   └── ppo/                           <- PPO .pt checkpoints
+└── run_episode.py                     <- Quick demo script
 ```
 
-### Key Features Demonstrated
+---
 
-1. Personality-Driven Responses: Each agent maintains their unique personality throughout the conversation
-2. Emotional State Tracking: Real-time emotional states are displayed with each message
-3. Trust Evolution: Trust relationships change based on interaction quality and content
-4. Insights Generation: The system provides detailed analysis of conversation dynamics
-5. Memory Integration: Agents reference previous interactions and maintain context
+## Why This Matters for Atropos
 
-### Emotional Contagion Example
+Most Atropos environments optimize for **correctness on well-defined tasks** (GSM8K, MBPP, tool-calling). SimuChat opens a new category: **social reasoning under uncertainty** — a capability orthogonal to math and code that's critical for agents operating in multi-agent or human-facing settings.
+
+Key research properties:
+
+- **Non-stationary rewards** — trust and emotion evolve continuously; optimal policy changes mid-episode
+- **Emergent coordination** — the +5 consensus bonus creates a coordination game with no explicit signaling
+- **Personality-conditioned generation** — three distinct LLM personas prevent rollout mode collapse
+- **Sparse high-value signals** — a single PROVIDE_EVIDENCE can shift the whole group; hard credit assignment
+- **Adversarial stress-testing** — AdversarialAgent baseline deliberately disrupts trust for robustness eval
+
+---
+
+## Hackathon Context
+
+Submitted to the **Nous Research × Cerebral Valley RL Environments Hackathon**
+📍 San Francisco · May 18, 2025 · 10:00 AM – 11:00 PM PDT
+
+Sponsors: xAI · NVIDIA · Nebius · Lambda · Akash Networks · TensorStax · RunPod
+
+Judges from: xAI · MIT · P-1 · Together AI · Nebius · Lambda Labs · Axolotl · Haize Labs ·
+Sophont · Mistral · Cursor · Edge AGI · RunPod · NVIDIA · Google · Latent Space Podcast ·
+TensorStax · SemiAnalysis · Nous Research
+
+Built on [Atropos](https://github.com/NousResearch/atropos) — Nous Research's async-first RL
+environment framework for LLMs.
+
+---
+
+## Citation
+
+```bibtex
+@misc{simuchat2025,
+  title   = {SimuChat: A Social Consensus RL Environment for Multi-Agent LLMs},
+  author  = {Seetha Ram, Gokul Srinath and Kumar, Khamalesh and Elavazhagan, Rashmi},
+  year    = {2025},
+  note    = {Nous Research x Cerebral Valley RL Environments Hackathon, San Francisco},
+  url     = {https://github.com/gokulsrinaths/Simuchat}
+}
 ```
-Alice: "I'm so excited about our new project!"
-[Charlie's joy increases from 0.3 to 0.5 due to emotional contagion from Alice]
-Charlie: "Your enthusiasm is contagious! I'm feeling more optimistic too."
-```
 
-### Trust Evolution Example
-```
-Bob: "I agree with Alice's analysis. Her approach is well-reasoned."
-[Bob's trust in Alice increases from 0.6 to 0.68 due to agreement and positive sentiment]
-```
+---
 
-## Research Contributions
+<div align="center">
 
-### Novel Aspects
-1. **Mathematical modeling of emotional contagion** in multi-agent systems
-2. **Trust dynamics integration** with emotional intelligence
-3. **Personality-consistent AI behavior** through LLM prompting
-4. **Real-time social dynamics analysis** and insights generation
+*Built for the Nous Research x Cerebral Valley RL Environments Hackathon · May 18, 2025*
 
-### Potential Applications
-- **Social AI research** and multi-agent system development
-- **Emotional intelligence training** and education
-- **Human-AI interaction studies** and interface design
-- **Trust modeling** in collaborative AI systems
-- **Personality-driven AI assistants** and chatbots
-
-## Evaluation and Results
-
-### System Performance
-- **Response generation**: Average 2-3 seconds per agent response
-- **Emotional processing**: Real-time emotional state updates
-- **Trust calculations**: Instant trust relationship updates
-- **Memory management**: Efficient conversation history tracking
-
-### User Experience
-- **Intuitive terminal interface** with clear visual indicators
-- **Engaging conversation flow** with personality-driven responses
-- **Educational insights** about social dynamics and emotional intelligence
-- **Interactive features** for user engagement and experimentation
-
-## Limitations and Future Work
-
-### Current Limitations
-- **Limited emotional complexity** compared to human emotional states
-- **Simplified trust model** that doesn't capture all trust dimensions
-- **Fixed personality traits** without learning or adaptation
-- **Single conversation context** without long-term relationship building
-
-### Future Enhancements
-- **Advanced emotional models** incorporating cultural and contextual factors
-- **Machine learning-based trust prediction** using interaction patterns
-- **Adaptive personality development** based on conversation history
-- **Multi-modal interaction** including voice and visual cues
-- **Extended conversation contexts** with memory consolidation
-- **Group dynamics modeling** for larger agent societies
-
-
-*SimuChat represents a step forward in creating more socially intelligent AI systems that can understand and simulate complex human-like interactions through mathematical modeling of emotions and trust dynamics.*
-
+</div>
