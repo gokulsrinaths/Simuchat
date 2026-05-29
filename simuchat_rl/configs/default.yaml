@@ -1,0 +1,92 @@
+environment:
+  max_rounds: 20
+  consensus_threshold: 0.75
+  n_agents: 3
+  render_mode: human
+
+llm:
+  model: llama-3.1-8b
+  temperature: 0.8
+  max_tokens: 150
+  top_p: 0.9
+  presence_penalty: 0.6
+  frequency_penalty: 0.4
+  max_retries: 3
+  timeout: 30
+
+rewards:
+  trust_build: 1.0
+  consensus: 5.0
+  evidence: 2.0
+  conflict_penalty: -1.0
+  polarization_penalty: -3.0
+  trust_threshold: 0.01
+  agreement_threshold: 0.02
+  polarization_threshold: 0.05
+
+training:
+  qlearning:
+    n_episodes: 500
+    learning_rate: 0.1
+    gamma: 0.99
+    epsilon_start: 1.0
+    epsilon_decay: 0.995
+    epsilon_min: 0.05
+    n_bins: 5
+
+  dqn:
+    n_episodes: 1000
+    learning_rate: 0.001
+    gamma: 0.99
+    epsilon_start: 1.0
+    epsilon_decay: 0.997
+    epsilon_min: 0.05
+    batch_size: 64
+    buffer_size: 10000
+    target_update_freq: 100
+    hidden_dim: 256
+    warmup_steps: 500
+
+  ppo:
+    n_episodes: 1000
+    learning_rate: 0.0003
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_eps: 0.2
+    entropy_coef: 0.01
+    value_coef: 0.5
+    n_epochs: 4
+    batch_size: 64
+    rollout_steps: 256
+    hidden_dim: 256
+    max_grad_norm: 0.5
+
+atropos:
+  reward_scale: 1.0
+  normalize_rewards: true
+  sequence_level_rewards: true
+  rollout_buffer_size: 1000
+
+metrics:
+  save_dir: results
+  csv_enabled: true
+  json_enabled: true
+  plot_enabled: true
+  rolling_window: 10
+
+topics:
+  - "climate change"
+  - "artificial intelligence ethics"
+  - "universal basic income"
+  - "space exploration"
+  - "social media regulation"
+  - "nuclear energy"
+  - "vaccine mandates"
+  - "cryptocurrency"
+  - "remote work"
+  - "immigration policy"
+  - "healthcare reform"
+  - "privacy vs security"
+  - "automation and jobs"
+  - "education reform"
+  - "wealth inequality"
